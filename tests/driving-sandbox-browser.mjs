@@ -9,16 +9,21 @@ import {BROWSER_CSP} from '../server/browser-policy.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)),out=path.join(root,'test-results/driving-browser');await mkdir(out,{recursive:true});
 const html=`<!doctype html><html><body style="margin:0;background:#111926"><div id="sandbox"></div><script type="module" src="/sandbox-fixture-entry.js"></script></body></html>`;
 const entry=`
-import {createApp,h} from '/node_modules/.vite/deps/vue.js';
+import {createApp,h} from 'vue';
 import DrivingSandbox from '/src/components/DrivingSandbox.vue';
 const parts=[{id:'chassis',name:'Fixture body',kind:'printed',material:'PLA',color:'#e35336',position:[0,0,38],rotation:[0,0,0],shape:{type:'box',size:[286,182,76]}}];
 for(const side of [-1,1])for(const [end,x,r] of [['front',-85,23.4],['rear',92,21]])parts.push({id:end+'_wheel_'+side,name:end+' wheel',kind:'purchased',material:'rubber',color:'#32343a',position:[x,side*70,r],rotation:[90,0,0],shape:{type:'cylinder',radius:r,height:14}});
 window.fixture=createApp({render:()=>h(DrivingSandbox,{parts,locale:'zh'})}).mount('#sandbox');
 `;
-const vite=await createServer({root,server:{host:'127.0.0.1',port:0},plugins:[{name:'sandbox-fixture',configureServer(server){
+const fixtureId='\0m4ke-sandbox-fixture';
+// Let Vite resolve imports rather than racing an assumed optimized-dependency
+// filename. Other browser fixtures use different configs, so keep caches apart.
+const vite=await createServer({root,cacheDir:path.join(out,'vite-cache'),optimizeDeps:{include:['vue']},server:{host:'127.0.0.1',port:0},plugins:[{name:'sandbox-fixture',
+  resolveId(id){if(id==='/sandbox-fixture-entry.js')return fixtureId;},
+  load(id){if(id===fixtureId)return entry;},
+  configureServer(server){
   server.middlewares.use(async(req,res,next)=>{
     const route=req.url?.split('?')[0];
-    if(route==='/sandbox-fixture-entry.js'){res.setHeader('Content-Type','application/javascript');res.end(entry);return;}
     if(route!=='/sandbox-fixture')return next();
     res.setHeader('Content-Type','text/html');res.setHeader('Content-Security-Policy',BROWSER_CSP);
     res.end(html);

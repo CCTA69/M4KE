@@ -141,8 +141,8 @@
       "bytes": 8328
     },
     "docs/local-sandbox-validation.md": {
-      "sha256": "ca86c398875bdeb68f7c5f802827cac6de575cd19c50447931419b07b676d9fd",
-      "bytes": 4012
+      "sha256": "1078714bf91bfa874b1edd05a0047e13bf93ed302c794e2190be0eca47495167",
+      "bytes": 4366
     },
     "docs/model-runtime-comparison.md": {
       "sha256": "0e35bd1c839ffd9ce9fa008670091b97f4bf8ca772b837ca185c204040e32913",
@@ -805,8 +805,8 @@
       "bytes": 8390
     },
     "tests/driving-sandbox-browser.mjs": {
-      "sha256": "d7c11b0864a5516e82df8f1c940bca3c2ba63d79f44d6ca130afdb09272419b5",
-      "bytes": 6006
+      "sha256": "3a959c3834d0d88578606d7184ec0766f4d03da34a34bf698efe788c9eb45bf5",
+      "bytes": 6245
     },
     "tests/driving-sandbox.test.mjs": {
       "sha256": "e99117b3b53c6cca1ccd1987a60dba410f9f2ce677955b84ba6662fb075bc8b4",

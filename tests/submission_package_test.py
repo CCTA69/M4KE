@@ -47,6 +47,7 @@ class PackageTests(unittest.TestCase):
                      'docs/project-layout.md', 'docs/README.md', '.editorconfig', '.gitattributes',
                      '.github/workflows/ci.yml', 'scripts/check-source.mjs', 'scripts/test-source.mjs',
                      'procurement/car-prices.mjs', 'procurement/install-china-car-observations.mjs',
+                     'procurement/echo-cn-bom.mjs', 'procurement/echo-cn-prices.mjs', 'procurement/install-echo-cn-observations.mjs',
                      'tests/procurement-e2e.mjs']:
             self.assertTrue(module.check.allowed_name(name), name)
 

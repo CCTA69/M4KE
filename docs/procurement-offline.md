@@ -1,6 +1,71 @@
 # 中国采购候选与离线价格快照
 
-## 2026-10-10 China car price observations
+## ECHO F1 CN v2 — confirmed baseline, dated observations
+
+The design owner confirmed the 17-row `echo-f1-cn-v2` BOM at
+[`65ecd8e`](https://github.com/frabcd/M4KE/blob/65ecd8efcae04d2c8b76a0a53ad208c3c647132d/cad/designs/echo_f1_cn_package.py)
+in [the coordination reply](https://github.com/frabcd/M4KE/pull/2#issuecomment-6096590294).
+`procurement/echo-cn-bom.mjs` transcribes those rows, with source line numbers and
+source-file SHA256 `6b29b691f67f6201bc0543f57e496bd54289943fa9227b70bf31b33945e2a772`.
+It is an authored revision reference, not the currently opened project's live BOM.
+Later design changes require a new reviewed baseline; we do not silently inherit them.
+
+**CNY 566 is the owner's budget allocation, not a supplier quote.** The O-ring row
+is one pack of ten with four installed; the bearing row is four individual 693ZZ
+bearings. PLA is a consumption allowance, not two whole spools. Both authored
+appearance variants are preserved. No motor, board, dimensions or firmware were replaced.
+
+| Authored line | Dated advertised observation | Unresolved |
+| --- | --- | --- |
+| DFR1063 Romeo mini ESP32-C3 | CNY 135.00, [China store](https://wechat.dfrobot.com.cn/goods-3848.html) | Exact revision, stock, tax, shipping and checkout |
+| DFR0034 sound sensor | CNY 40.00, [China listing](https://www.dfrobot.com.cn/goods-85.html) | Revision, connector/cable and conflicting dimensions |
+| DFR0379 adjustable regulator | CNY 20.00, [China listing](https://www.dfrobot.com.cn/goods-1351.html) | Listing identifies another/unspecified brand; full 66 × 40 × 20 mm design envelope unconfirmed |
+
+These are attributed factual transcriptions reviewed on 2026-10-10, not original
+supplier HTML or a live refresh. Search/page crawls were reported as three days,
+three weeks and one month old respectively. The regulator result included a
+`from=rss` query; its canonical URL is retained and the clean-page open timed out.
+All three remain `advertised-only`, freshness `UNKNOWN`, quantity quote
+`UNQUOTABLE` and purchase qualification false. **14 of 17 rows lack even an
+observation; the whole-car purchase total remains UNKNOWN.** Do not add these
+three prices to the other rows' budget allocations to manufacture a quotation.
+
+The sensor retains `DIMENSIONS_TO_CONFIRM`: the
+[English wiki](https://wiki.dfrobot.com/dfr0034/) and existing design say
+22 × 30 mm; the China listing says 22 × 32 mm. The design owner must resolve exact
+revision, outline, connector envelope and cable pinout before fit approval.
+Motor/wheel seller SKU and regulator/battery-holder envelopes also remain open.
+No CAD is resized by this pricing integration.
+
+Install locally without contacting suppliers:
+
+```sh
+node procurement/install-echo-cn-observations.mjs
+export M4KE_PROCUREMENT_SNAPSHOT_SHA256=7aac1dad97239eee8a60d1823151f610c691afd25a9e365b1f107380c5ec41e5
+npm start
+```
+
+PowerShell: `$env:M4KE_PROCUREMENT_SNAPSHOT_SHA256='7aac1dad97239eee8a60d1823151f610c691afd25a9e365b1f107380c5ec41e5'`.
+Use the install receipt's digest if transcription content changes. Set the same
+pin for HTTP and MCP processes; installation does not alter a running service or
+deploy to DGX. The deployment owner controls process restarts. No API key is required.
+This pin selects the three CN v2 observations; it does not merge older observations.
+
+`GET /api/studio/procurement` adds `echoF1CnV2Reference` alongside the explicitly
+historical `soundCarReference`. Association requires the reviewed manufacturer,
+MPN, supplier SKU, variant, package, market and currency. Duplicate associations
+remain ambiguous. Library IDs or matching chip names alone cannot establish fit.
+The shared selected snapshot supplies cached MCP search; quote calls remain
+unquotable for these excerpts. Corrupted evidence removes both reference views.
+
+Validation: `node --test tests/echo-cn-pricing.test.mjs` checks the source baseline,
+purchase/installed quantities, exact associations, old-car exclusion and real
+import/API tampering. Run `M4KE_TEST_ECHO_CN=1 node tests/procurement-e2e.mjs` for
+the real English/Chinese component + HTTP test (PowerShell: set
+`$env:M4KE_TEST_ECHO_CN='1'`, then run the script). Without the flag, it checks
+the historical snapshot and zero CN observations. Neither mode contacts suppliers.
+
+## Historical sound-car-v1 — 2026-10-10 China price observations
 
 The existing `sound-car-v1` reference uses one headerless Pico, one Adafruit
 #1063 microphone, one Pololu #2130 driver, two #1098 motors, two #1420 wheels,

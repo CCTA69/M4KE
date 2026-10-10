@@ -2,6 +2,7 @@ import path from 'node:path';
 import { readImportedSnapshot } from '../procurement/import.mjs';
 import { quoteLine } from '../procurement/snapshot.mjs';
 import { soundCarPriceCoverage } from '../procurement/car-prices.mjs';
+import { echoCnPriceCoverage } from '../procurement/echo-cn-prices.mjs';
 
 // Historical default only. Do not read environment while static imports evaluate.
 export const PROCUREMENT_SNAPSHOT = '10274e8058359c921c6880058ea51f8856e4be409b551abf11d78d1de95a64b4';
@@ -55,6 +56,7 @@ export function createProcurementService({ root, json, now = () => Date.now(), s
         snapshotCreatedAt: snapshot.createdAt, checkedAt: new Date(checkedAt).toISOString(), evidenceIntegrity: 'PASS', semanticClaimsVerified: false,
         verifiedEvidenceBytes: verification.totalBytes, ttlHours: TTL_HOURS, entries,
         soundCarReference: soundCarPriceCoverage(snapshot, {now:checkedAt}),
+        echoF1CnV2Reference: echoCnPriceCoverage(snapshot, {now:checkedAt}),
         networkUsed: false, liveSupplierConnected: false, mcpUsed: false, completeBom: false, defaultMaterial: null, purchaseMade: false, engineeringQualified: false,
         limitations: [
           'Dated observations, not live prices, stock promises, landed cost or a complete car BOM. One-unit amounts use the supplier order unit.',

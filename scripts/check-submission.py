@@ -70,6 +70,7 @@ EXACT = {
     'printing/bambu_handoff.py', 'printing/lan-monitor.mjs',
     'procurement/snapshot.mjs', 'procurement/import.mjs', 'procurement/SCHEMA.md',
     'procurement/car-prices.mjs', 'procurement/install-china-car-observations.mjs', 'tests/procurement-e2e.mjs',
+    'procurement/echo-cn-bom.mjs', 'procurement/echo-cn-prices.mjs', 'procurement/install-echo-cn-observations.mjs',
     'docs/printer-lan.md', 'docs/procurement-offline.md', 'docs/portable-car-layout.md',
     'skills/prompt-to-cad/SKILL.md', 'skills/prompt-to-cad/runtime-design.md', 'skills/prompt-to-cad/runtime-refinement.md', 'skills/prompt-to-cad/runtime-architecture.md',
     'skills/engineering-verification/SKILL.md', 'skills/engineering-verification/runtime-verify.md', 'skills/engineering-verification/runtime-repair.md', 'skills/engineering-verification/runtime-plan.md', 'tests/studio-electrical-fixture.mjs', 'tests/studio-electrical-e2e.mjs', 'tests/studio-electrical-live-e2e.mjs', 'docs/electrical-workflow.md',

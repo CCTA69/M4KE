@@ -1,5 +1,58 @@
 # 中国采购候选与离线价格快照
 
+## Search prices for any BOM
+
+The **Procurement** panel now has a general parts-list price search. Load purchased
+parts from the current design or enter one line per component:
+`name or MPN | quantity | exact MPN (optional)`. A clock, car or another product
+uses the same path; no benchmark-specific parts are selected. Printed parts are
+not translated into guessed filament costs.
+
+Start the app with `M4KE_ALLOW_WEB=1` to permit requests. This enables direct
+DFRobot China public search without an API key. A configured local SearXNG gateway
+can supply additional supported product links when direct search has no results.
+Automatic product-page extraction currently supports DFRobot displayed prices
+and Product/Offer JSON-LD on LCSC China pages. Other suppliers, login challenges,
+unpublished prices and unsupported markup remain explicit gaps. This is not an
+all-marketplace price API. No account cookies or paid API credentials are used.
+
+On networks that require a proxy, an operator may set `M4KE_PRICE_PROXY_URL` to
+an existing trusted loopback HTTP CONNECT proxy. No proxy is started automatically.
+Direct requests require public IPv4 DNS; proxy mode delegates DNS/routing to that
+operator-selected proxy while retaining supplier TLS certificate verification.
+URLs and proxy endpoints cannot be supplied through the search API.
+
+AI clients connected to the existing M4KE MCP server can call `search_bom_prices`:
+
+```json
+{"items":[{"id":"rtc","query":"DS3231","quantity":1}]}
+```
+
+Each call accepts up to 20 rows. Longer lists must be batched. HTTP uses
+`POST /api/studio/prices/search` with the same body; GET reports enablement.
+The UI processes rows individually, shows progress and can stop remaining rows.
+The design owner supplies identities/quantities; search does not design the product.
+Native model orchestration can consume this tool, but this change does not alter
+its generation pipeline or make every design run automatically call the tool.
+
+Results carry CNY amounts, supplier URLs, SKU when extracted, source-text hashes,
+retrieval times and unverified availability text. A matching identifier still
+requires variant and purchase-unit review. Pack quantity, tax/shipping and totals
+remain unknown when not explicitly established. Search snippets and aggregate
+price ranges are never promoted to extracted product prices. An observed price
+does not establish current stock, compatibility, or purchase approval.
+
+The cache is bounded per response and hash checked, with a one-hour local TTL.
+Offline mode reads marked cached results and never fetches suppliers. New searches
+do not overwrite the existing reviewed procurement snapshot or change its 3/17
+historical CN v2 coverage. Raw supplier HTML is not included in the source release.
+
+Validation: `node --test tests/live-prices.test.mjs tests/studio-integrations.test.mjs`
+and `node tests/live-prices-browser.mjs`. Browser regression uses synthetic supplier
+HTML through the real parser, HTTP service and Vue panel; it is not a live quote.
+Live network checks must be reported separately, with actual search terms and
+timestamps. Activation on a DGX remains a deployment-owner task.
+
 1688 人工审阅的零件信息可通过[离线导入适配器](1688-import.md)入库。
 保留精确 SKU、阶梯数量价格和来源证据；不宣称已经连接 1688 实时 API，也不自动修改应用固定快照。
 

@@ -76,6 +76,7 @@ onMounted(() => {
     syncProjection();
     syncDisplay();
     syncModel();
+    controller.setWiringMode(props.viewMode === 'wiring');
     controller.setAssemblyFrame(props.assemblyPlayback || null);
   } catch (error) {
     load.value.error = `${t('WebGL 视口不可用；模型下载仍可使用。', 'WebGL viewport unavailable; model downloads remain available.')} ${error instanceof Error ? error.message : String(error)}`;
@@ -86,7 +87,7 @@ watch(() => [props.selectedIds, props.activeId, props.hiddenIds, props.highlight
 watch(() => props.locale, syncLabel);
 watch(() => props.projection, syncProjection);
 watch(() => props.assemblyPlayback, value => controller?.setAssemblyFrame(value || null), {deep: true});
-watch(() => props.viewMode, value => {if (value === 'wiring') controller?.setWires(true);});
+watch(() => props.viewMode, value => controller?.setWiringMode(value === 'wiring'));
 onBeforeUnmount(() => {controller?.dispose(); controller = undefined;});
 </script>
 
@@ -96,6 +97,7 @@ onBeforeUnmount(() => {controller?.dispose(); controller = undefined;});
     :data-native-parse-ms="load.parseMs.toFixed(1)" :data-wire-count="load.routed" :data-wires-visible="load.wiresVisible"
     :data-selected-wire="selectedConnection || ''" :data-projection="load.projection" :data-view="load.direction"
     :data-selected-ids="selectedIds.join(',')" :data-hidden-ids="hiddenIds.join(',')"
+    :data-wiring-focus="viewMode === 'wiring'"
     :data-assembly-step="assemblyPlayback?.stepId || ''" :data-assembly-progress="assemblyPlayback?.progress">
     <div ref="host" class="viewport-canvas" />
     <div class="viewport-toolbar" role="toolbar" :aria-label="t('视口工具', 'Viewport tools')">

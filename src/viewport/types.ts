@@ -31,6 +31,20 @@ export type ElectricalConnection = {
   id: string; from: ElectricalEndpoint; to: ElectricalEndpoint; kind: string; color: string;
   wireAwg?: number; fromAnchorMm?: PointMm; toAnchorMm?: PointMm; polylineMm?: PointMm[];
   routingStatus: 'MODEL_ASSUMED' | 'MISSING_ANCHORS';
+  note?: string;
+  displayWireRadiusMm?: number;
+  anchorStatus?: 'VIRTUAL_SURFACE_PORT_NOT_REAL_PIN';
+};
+export type WireDisplayReport = {
+  schemaVersion: number; purpose: string; includesClosedShellInCollisionCheck: boolean;
+  wireRadiusMm: number; partClearanceMm: number;
+  modelBindings: Record<string, {stl: string; step: string; position: PointMm; rotation: PointMm}>;
+  connections: {
+    id: string; status: string; endpoints?: {from: ElectricalEndpoint; to: ElectricalEndpoint};
+    fromAnchorMm?: PointMm; toAnchorMm?: PointMm; polylineMm?: PointMm[];
+    wireRadiusMm?: number; clearanceMm?: number; anchorStatus?: 'VIRTUAL_SURFACE_PORT_NOT_REAL_PIN';
+    collisions?: unknown[];
+  }[];
 };
 export type Selection = {ids: string[]; activeId: string | null};
 export type AssemblyFrame = {stepId: string; settledIds: string[]; activeIds: string[]; movingIds: string[]; progress: number};

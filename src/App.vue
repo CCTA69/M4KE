@@ -45,6 +45,8 @@ const LibraryPanel = defineAsyncComponent(
 const RuntimePanel = defineAsyncComponent(
   () => import("./components/RuntimePanel.vue"),
 );
+const DrivingSandbox = defineAsyncComponent(() => import('./components/DrivingSandbox.vue'));
+const drivingOpen = ref(false);
 const s = useStudio(),
   workspaceName = ref(""),
   sheet = ref<"projects" | "library" | "runtime" | null>(null),
@@ -505,7 +507,11 @@ async function create() {
             }}<ArrowRight :size="15" />
           </button>
         </div>
-        <div class="viewport-area" v-show="s.view.viewMode === 'model'">
+        <div v-if="hasModel && s.view.viewMode === 'model'" class="toolbar">
+          <button data-testid="open-driving-sandbox" :aria-expanded="drivingOpen" @click="drivingOpen = !drivingOpen">{{s.t(drivingOpen?'关闭行驶仿真':'打开行驶仿真（估算）',drivingOpen?'Close driving sandbox':'Open driving sandbox (estimated)')}}</button>
+        </div>
+        <DrivingSandbox v-if="drivingOpen && hasModel && s.view.viewMode === 'model'" :parts="s.displaySpec!.parts" :cad-parts="s.cadParts" :components="s.catalog.components" :library-sources="s.librarySources" :locale="s.locale" />
+        <div class="viewport-area" v-show="s.view.viewMode === 'model' && !drivingOpen">
           <StudioViewport
             v-if="hasModel"
             :parts="s.displaySpec!.parts"

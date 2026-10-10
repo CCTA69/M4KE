@@ -15,7 +15,7 @@ test('runtime entry and shared browser contract have one canonical location', ()
   assert(existsSync(join(root, 'shared/car-contract.mjs')));
   assert.equal(existsSync(join(root, 'server.mjs')), false);
   assert.equal(existsSync(join(root, 'car-contract.mjs')), false);
-  assert.equal(JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).scripts['test:e2e'], 'node tests/studio-shell-e2e.mjs && node tests/studio-electrical-e2e.mjs && node tests/vue-viewport-e2e.mjs');
+  assert.equal(JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).scripts['test:e2e'], 'node tests/studio-shell-e2e.mjs && node tests/studio-electrical-e2e.mjs && node tests/vue-viewport-e2e.mjs && node tests/driving-sandbox-browser.mjs');
   assert(existsSync(join(root, 'tests/studio-shell-e2e.mjs')));
 });
 

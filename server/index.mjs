@@ -8,6 +8,8 @@ export {validateEndpoint,validateModel,validateProvider} from './studio-inferenc
 import { CAR_PROMPT, validateCar } from '../shared/car-contract.mjs';
 import {createStudioService} from './studio-service.mjs';
 import {sendArtifact} from './studio-http.mjs';
+import {BROWSER_CSP} from './browser-policy.mjs';
+import {createAuthoredBuilds} from './authored-builds.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 try { process.loadEnvFile(path.join(root, '.env')); } catch (error) { if (error.code !== 'ENOENT') console.warn('Could not load .env:', error.message); }
@@ -154,9 +156,10 @@ const systemPrompt = `You are M4KE's engineering design assistant. Use a Dyson-i
 const mime = {'.html':'text/html; charset=utf-8','.js':'application/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.ico':'image/x-icon','.woff2':'font/woff2','.glb':'model/gltf-binary'};
 export function createServer() {
   const studio=createStudioService({root,getSettings:()=>settings,localFetch,getModels,body,json});
+  const authored=createAuthoredBuilds(root);
   return http.createServer(async (req,res) => {
     res.setHeader('X-Content-Type-Options','nosniff'); res.setHeader('Referrer-Policy','no-referrer');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self' data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
+    res.setHeader('Content-Security-Policy', BROWSER_CSP);
     const host = req.headers.host || '';
     if (!/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host)) return json(res,403,{error:'Local host access only.'});
     if (req.headers.origin && req.headers.origin !== `http://${host}` && req.headers.origin !== `https://${host}`) return json(res,403,{error:'Cross-origin requests are disabled.'});
@@ -168,6 +171,7 @@ export function createServer() {
     try {
       if(settingsSaving && req.method==='POST')return json(res,409,{error:'Inference settings are being saved. Retry after the save finishes.'});
       if(req.method==='POST'&&pathname!=='/api/settings'){activePostRequests++;reserved=true;}
+      if(await authored(req,res,pathname))return;
       if(await studio(req,res,pathname,controller.signal))return;
       if (pathname === '/api/health' && req.method === 'GET') return json(res,200,{runtime:'node-local',provider:settings.provider,model:settings.model,endpointConfigured:!!settings.endpoint,status:settings.endpoint && settings.model ? 'configured' : 'not-configured',onlineRequired:settings.provider==='codex-bridge',cloudFallback:false});
       if (pathname === '/api/settings' && req.method === 'GET') return json(res,200,settings);

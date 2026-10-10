@@ -14,6 +14,7 @@ export function validateModel(value) {
   return value;
 }
 export function validateProvider(value = 'ollama') {
+  if (process.env.M4KE_OFFLINE_ONLY === '1' && value === 'codex-bridge') throw new Error('Offline-only mode permits Ollama/vLLM on this machine, not an online bridge.');
   if (!['ollama', 'vllm', 'codex-bridge'].includes(value)) throw new Error('Choose Ollama, vLLM or the explicit online Codex demo bridge.');
   return value;
 }

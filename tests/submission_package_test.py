@@ -54,6 +54,16 @@ class PackageTests(unittest.TestCase):
         for name in ['src/.env', 'src/.private/key.ts', 'src/node_modules/pkg/index.ts', 'src/components/../../../.env']:
             self.assertFalse(module.check.allowed_name(name), name)
 
+    def test_authored_sources_and_handoff_do_not_admit_generated_print_jobs(self):
+        for name in ['texting.txt', 'server/authored-builds.mjs', 'cad/designs/echo_f1_cn.py',
+                     'printing/authored_plates.py', 'printing/echo_finish.py',
+                     'firmware/echo-f1-cn/main.py', 'tests/verify-wire-clearance.py']:
+            self.assertTrue(module.check.allowed_name(name), name)
+        for name in ['builds/echo-f1-cn-v2/manifest.json', 'builds/echo-f1-cn-v2/print/chassis.stl',
+                     'builds/echo-f1-cn-v2/plates/job.gcode.3mf', '.venv-car/pyvenv.cfg',
+                     'procurement/taobao-cart-private.json']:
+            self.assertFalse(module.check.allowed_name(name), name)
+
     def test_archive_is_reproducible_hash_checked_and_keeps_catalog_unavailable(self):
         with tempfile.TemporaryDirectory() as folder:
             first, second = Path(folder) / 'first.zip', Path(folder) / 'second.zip'

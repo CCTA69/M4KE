@@ -325,7 +325,8 @@ export class StudioViewportController {
     if (!geometry.getAttribute('normal')) geometry.computeVertexNormals();
     const material = new THREE.MeshStandardMaterial({
       color: catalogPreview ? '#8ba6c4' : /^#[a-f0-9]{6}$/i.test(part.color) ? part.color : '#8095ac',
-      roughness: part.kind === 'printed' ? .48 : .56, metalness: part.kind === 'printed' ? .04 : .22,
+      roughness: part.kind === 'printed' ? (part.displayFinish === 'silk' ? .3 : .48) : .56,
+      metalness: part.kind === 'printed' ? (part.displayFinish === 'silk' ? .12 : .04) : .22,
       transparent: catalogPreview, opacity: catalogPreview ? .38 : 1,
       depthWrite: !catalogPreview,
     });
@@ -362,13 +363,16 @@ export class StudioViewportController {
         this.wireMeshes.push(mesh);
       };
       const points = connection.polylineMm!.map(point => new THREE.Vector3(...point));
+      // Collision-screened display paths must render at their checked radius,
+      // including junctions. Oversized end markers would invalidate clearance.
+      const radius = connection.displayWireRadiusMm ?? .55;
       for (let i = 1; i < points.length; i++) {
         const a = points[i - 1], b = points[i], delta = b.clone().sub(a), length = delta.length();
         if (length < 1e-6) continue;
-        add(new THREE.CylinderGeometry(.55, .55, length, 8), a.clone().add(b).multiplyScalar(.5),
+        add(new THREE.CylinderGeometry(radius, radius, length, 12), a.clone().add(b).multiplyScalar(.5),
           new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize()));
       }
-      for (const point of [points[0], points[points.length - 1]]) add(new THREE.SphereGeometry(1, 10, 8), point);
+      for (const point of points) add(new THREE.SphereGeometry(radius, 12, 10), point);
     }
     this.publish({routed: connections.length});
     this.updateWires();
@@ -382,6 +386,10 @@ export class StudioViewportController {
       const active = this.display.activeId === id;
       mesh.material.emissive.set(active ? '#e9a145' : selected.has(id) ? '#6ba2f4' : this.assembly?.activeIds.includes(id) || highlighted.has(id) ? '#85add8' : '#000000');
       mesh.material.emissiveIntensity = active ? .3 : selected.has(id) || this.assembly?.activeIds.includes(id) || highlighted.has(id) ? .2 : 0;
+      mesh.material.opacity = mesh.userData.catalogEnvelope ? .38 : 1;
+      mesh.material.transparent = !!mesh.userData.catalogEnvelope;
+      mesh.material.depthWrite = !mesh.material.transparent;
+      mesh.castShadow = !mesh.material.transparent;
     }
     this.updateWires();
   }
@@ -397,8 +405,11 @@ export class StudioViewportController {
       const active = connection.id === this.display.selectedConnection;
       const dimmed = !!this.display.selectedConnection && !active;
       mesh.material.transparent = dimmed;
-      mesh.material.opacity = dimmed ? .16 : 1;
+      mesh.material.opacity = dimmed ? .07 : 1;
       mesh.material.depthWrite = !dimmed;
+      // A selected wire must still be occluded by the nearest solid surface.
+      mesh.material.depthTest = true;
+      mesh.renderOrder = 0;
       mesh.material.emissive.copy(active ? mesh.material.color : new THREE.Color(0));
       mesh.material.emissiveIntensity = active ? .4 : 0;
     }
@@ -492,6 +503,10 @@ export class StudioViewportController {
   }
 
   setWires(show: boolean): void { this.publish({showWires: show}); this.updateWires(); }
+  setWiringMode(enabled: boolean): void {
+    if (enabled) {this.setExploded(false); this.setWires(true);}
+    this.applyDisplay();
+  }
   setExploded(exploded: boolean): void {
     if (exploded && this.assembly) return;
     this.publish({exploded});

@@ -105,3 +105,7 @@ __pycache__/
 /printing/dgx/setup-lock.json
 /docs/submission/artifacts/
 /docs/submission/clean-*/
+
+# Authored build outputs and local CAD environment are not source.
+/builds/
+/.venv-car/

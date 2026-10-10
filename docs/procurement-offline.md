@@ -1,6 +1,81 @@
 # 中国采购候选与离线价格快照
 
-## 这次实际完成了什么
+## 2026-10-10 China car price observations
+
+The existing `sound-car-v1` reference uses one headerless Pico, one Adafruit
+#1063 microphone, one Pololu #2130 driver, two #1098 motors, two #1420 wheels,
+two #1086 brackets and one #950 caster. Wheels and brackets are sold as pairs.
+This is a reference-kit comparison, not the active project's generated BOM.
+Power/control candidates, wiring, fasteners and printed-material consumption still
+need their own revision-matched purchase list. No hardware was substituted.
+
+| Exact model | China-market observation | Limitation |
+| --- | --- | --- |
+| Pico / element14 3643332 | CNY 29.25 before tax; displayed 33.0525 including tax | Web extraction, not a successful direct refresh; exact R3 revision unknown |
+| Adafruit 1063 / DigiKey 1528-1013-ND | CNY 57.48 at quantity 1, including 13% VAT | Opened-page extraction; an older search result said 57.47; not a live quote |
+| Pololu 2130 / LCSC C6661942 | CNY 65.88 advertised in structured metadata | Out of stock; quantity tiers and tax unconfirmed |
+| Pololu 1098, 1420, 1086, 950 | No verified CNY quantity price found | USD/JPY prices and lookalike products excluded |
+
+Sources: [element14 China](https://www.element14.cn/en-CN/c/raspberry-pi/raspberry-pi-boards/prl/results),
+[DigiKey China](https://www.digikey.cn/zh/products/detail/adafruit-industries-llc/1063/4990762),
+[LCSC](https://item.szlcsc.com/7616935.html). China-market pricing does not establish
+domestic warehouse inventory. These are dated observations, not checkout quotes.
+
+Install the included factual transcriptions locally (no supplier network calls):
+
+```sh
+node procurement/install-china-car-observations.mjs
+# Set this environment variable before starting both the web server and MCP process:
+export M4KE_PROCUREMENT_SNAPSHOT_SHA256=84c83ae3c682b12461bdbe328fd7cdaace328762d1d0b330fb75946910c473e8
+npm start
+```
+
+PowerShell uses `$env:M4KE_PROCUREMENT_SNAPSHOT_SHA256='84c83ae3c682b12461bdbe328fd7cdaace328762d1d0b330fb75946910c473e8'`.
+The installer prints the digest; use that result if the transcription changes.
+It preserves incoming bundles and imports idempotently by content hash. It does
+not change any running service or copy evidence to the DGX. Apply the same pin
+to each deployed process and restart under the deployment owner's control.
+Both HTTP and standalone MCP load the project-root `.env` before constructing
+their procurement runtime. The selected pin is validated and fixed for that
+runtime; later environment changes do not switch search, quote or HTTP sources.
+An explicitly set process environment value takes precedence over `.env`.
+
+The three source extracts are deliberately `web-extract`, including the LCSC
+metadata transcription: their hashes verify these texts, not original supplier
+HTML. They display in the existing procurement panel and cached MCP search, but
+freshness remains UNKNOWN and quantity quotes remain UNQUOTABLE. The original
+LCSC HTML hash is recorded for audit; the private HTML is not redistributed.
+This dataset therefore has **zero currently quotable lines**, three historical
+price observations and four missing model prices. It must not display a total
+of zero or the three observations added together as the car cost.
+
+The service accepts only a startup-configured SHA256, never a browser-supplied
+path or URL. Blank configuration preserves the old historical snapshot. Missing
+or modified evidence returns 503 without fetching or silently switching sources.
+The UI accepts 1–100 verified entries rather than one hard-coded four-item pin;
+the same selected pin is used by MCP cached search and quantity quotes.
+
+`procurement/car-prices.mjs` contains explicit identity/variant and purchase-unit
+bindings for the reference, including explicit package descriptions (`One board`,
+`One motor`, `One pair`, `One caster`). Import new, reviewed supplier evidence to update
+prices. Different supplier names/variants or pack sizes need a reviewed binding
+change; catalog association alone is insufficient. Multiple exact candidates
+remain ambiguous. Partial subtotals use decimal arithmetic and separate tax
+bases; stale, web-extracted, advertised, insufficient-stock, out-of-stock and
+unknown-order-rule/tax lines are excluded. Unknown, expired or backorder stock and
+stock measured in a different unit are also excluded. Shipping and complete build cost are
+always unresolved in this reference comparison.
+
+Validation: `node --test tests/china-car-pricing.test.mjs` covers two motors vs
+one wheel pair, wrong identity/currency/unit/market, stale or extracted evidence,
+stock, tax separation, ambiguous sources, installation and post-import tampering.
+`node tests/procurement-e2e.mjs` renders the real panel and imported observations
+in English and Chinese, then verifies that a tampered source clears displayed prices.
+`node --test tests/procurement-startup.test.mjs` starts the production server in
+an isolated directory with a real `.env`, checks HTTP/MCP pin agreement, and
+covers frozen runtime settings, invalid/missing pins and environment precedence.
+
+## 历史记录：2026-09-27 初始离线快照
 
 `procurement/` 是独立、离线、可验证的**供应商观察数据入口**。它不修改现有九项来源目录、不改变车的选型、不连接购物车、不下单，也没有声称已经把嘉立创 MCP 接入应用。review-03 发布包保持原样，本新增目录尚未加入该包。
 

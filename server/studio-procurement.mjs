@@ -1,12 +1,19 @@
 import path from 'node:path';
 import { readImportedSnapshot } from '../procurement/import.mjs';
 import { quoteLine } from '../procurement/snapshot.mjs';
+import { soundCarPriceCoverage } from '../procurement/car-prices.mjs';
 
+// Historical default only. Do not read environment while static imports evaluate.
 export const PROCUREMENT_SNAPSHOT = '10274e8058359c921c6880058ea51f8856e4be409b551abf11d78d1de95a64b4';
+export function resolveProcurementSnapshot(value = process.env.M4KE_PROCUREMENT_SNAPSHOT_SHA256 || PROCUREMENT_SNAPSHOT) {
+  if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) throw Error('Procurement snapshot must be SHA256.');
+  return value;
+}
 const TTL_HOURS = 24;
 
 /** Read-only, one explicitly reviewed snapshot. No user-selected file or supplier URL. */
-export function createProcurementService({ root, json, now = () => Date.now() }) {
+export function createProcurementService({ root, json, now = () => Date.now(), snapshotSha256 = resolveProcurementSnapshot() }) {
+  resolveProcurementSnapshot(snapshotSha256);
   let activeReads = 0;
   return async function handle(req, res, pathname) {
     if (pathname !== '/api/studio/procurement' || req.method !== 'GET') return false;
@@ -19,7 +26,7 @@ export function createProcurementService({ root, json, now = () => Date.now() })
     let payload, status;
     try {
       const checkedAt = now();
-      const { snapshot, verification } = await readImportedSnapshot(PROCUREMENT_SNAPSHOT, { root: path.join(root, 'procurement'), now: checkedAt });
+      const { snapshot, verification } = await readImportedSnapshot(snapshotSha256, { root: path.join(root, 'procurement'), now: checkedAt });
       const entries = snapshot.entries.map(e => {
         const priceSource = snapshot.evidence.find(s => s.id === e.price.evidenceId);
         const observedAt = priceSource?.capturedAt ?? null;
@@ -47,17 +54,18 @@ export function createProcurementService({ root, json, now = () => Date.now() })
         schemaVersion: 1, available: true, status: 'VERIFIED_OFFLINE_SNAPSHOT', snapshotSha256: verification.snapshotSha256,
         snapshotCreatedAt: snapshot.createdAt, checkedAt: new Date(checkedAt).toISOString(), evidenceIntegrity: 'PASS', semanticClaimsVerified: false,
         verifiedEvidenceBytes: verification.totalBytes, ttlHours: TTL_HOURS, entries,
+        soundCarReference: soundCarPriceCoverage(snapshot, {now:checkedAt}),
         networkUsed: false, liveSupplierConnected: false, mcpUsed: false, completeBom: false, defaultMaterial: null, purchaseMade: false, engineeringQualified: false,
         limitations: [
           'Dated observations, not live prices, stock promises, landed cost or a complete car BOM. One-unit amounts use the supplier order unit.',
-          'Pico revision is unverified; Pico H and the bare DRV8833PWPR IC are not automatic substitutes for the current source kit.',
-          'PLA Basic is a family-level TDS reference with no selected color/spool SKU or acquired CNY price. Typical specimen strength is not an as-printed design allowable.',
+          'The sound-car comparison is a reference kit, not the active project BOM. Variants and purchase packs must match explicitly.',
+          'Missing, stale, advertised and web-extracted prices cannot establish a current whole-car cost. Missing prices are not zero.',
           'Hash checks prove local byte identity, not supplier correctness or physical compatibility. No component/material adoption or purchase is performed.',
         ],
       };
     } catch {
       status = 503;
-      payload = { schemaVersion: 1, available: false, status: 'PINNED_SNAPSHOT_UNAVAILABLE', snapshotSha256: PROCUREMENT_SNAPSHOT, evidenceIntegrity: 'NOT_VERIFIED', entries: [], networkUsed: false, purchaseMade: false, engineeringQualified: false, defaultMaterial: null,
+      payload = { schemaVersion: 1, available: false, status: 'PINNED_SNAPSHOT_UNAVAILABLE', snapshotSha256, evidenceIntegrity: 'NOT_VERIFIED', entries: [], networkUsed: false, purchaseMade: false, engineeringQualified: false, defaultMaterial: null,
         error: 'The pinned offline supplier snapshot is missing or failed integrity validation. No price is substituted and no online fallback was attempted.' };
     }
     // A disconnected response must not cause a second JSON write in the error path.

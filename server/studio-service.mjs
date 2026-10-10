@@ -21,7 +21,7 @@ import {buildModelRepairSchema,applyModelRepair} from './studio-model-repair.mjs
 import {generateRefinement,refinementProvenance} from './studio-refinement.mjs';
 import {createPrintingService} from './studio-printing.mjs';
 import {createPrinterService} from './studio-printer.mjs';
-import {createProcurementService} from './studio-procurement.mjs';
+import {createProcurementService,resolveProcurementSnapshot} from './studio-procurement.mjs';
 import {createIntegrationsService,createIntegrationRuntime} from './studio-integrations.mjs';
 import {createWebResearch,modelResearch} from './studio-web-research.mjs';
 import {generateIllustrations} from './studio-illustrations.mjs';
@@ -118,8 +118,9 @@ export function createStudioService({root,getSettings,localFetch,getModels,body,
   const projects=createProjectStore({root,execute:runWorkflow,findJob,assistant:projectAssistant,prepareCandidate});
   const printing=createPrintingService({root,python,runProcess:processRunner,findJob,checkedRead,body,json});
   const printer=createPrinterService({body,json});
-  const procurement=createProcurementService({root,json});
-  const integrations=createIntegrationsService({root,json,body}),sourcing=createIntegrationRuntime({root}),research=createWebResearch({root});
+  const snapshotSha256=resolveProcurementSnapshot();
+  const procurement=createProcurementService({root,json,snapshotSha256});
+  const integrations=createIntegrationsService({root,json,body,snapshotSha256}),sourcing=createIntegrationRuntime({root,snapshotSha256}),research=createWebResearch({root});
   async function localCatalog(){const catalog=await loadCatalog(root);catalog.kits=getDesignKitOptions(catalog);return catalog;}
   async function infer(...args){const prior=inferenceTail;let release;inferenceTail=new Promise(r=>{release=r;});await prior;try{return await localFetch(...args);}finally{release();}}
   async function probe(force=false) {

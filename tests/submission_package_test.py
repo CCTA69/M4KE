@@ -45,7 +45,9 @@ class PackageTests(unittest.TestCase):
         for name in ['server/index.mjs', 'server/studio-service.mjs', 'shared/car-contract.mjs',
                      'CONTRIBUTING.md', 'SECURITY.md', 'docs/architecture.md',
                      'docs/project-layout.md', 'docs/README.md', '.editorconfig', '.gitattributes',
-                     '.github/workflows/ci.yml', 'scripts/check-source.mjs', 'scripts/test-source.mjs']:
+                     '.github/workflows/ci.yml', 'scripts/check-source.mjs', 'scripts/test-source.mjs',
+                     'procurement/car-prices.mjs', 'procurement/install-china-car-observations.mjs',
+                     'tests/procurement-e2e.mjs']:
             self.assertTrue(module.check.allowed_name(name), name)
 
     def test_nested_vue_sources_are_allowed_without_private_or_dependency_trees(self):

@@ -69,6 +69,7 @@ EXACT = {
     'printing/dgx/test_adapter.py', 'printing/dgx/make_smoke_fixture.py',
     'printing/bambu_handoff.py', 'printing/lan-monitor.mjs',
     'procurement/snapshot.mjs', 'procurement/import.mjs', 'procurement/SCHEMA.md',
+    'procurement/car-prices.mjs', 'procurement/install-china-car-observations.mjs', 'tests/procurement-e2e.mjs',
     'docs/printer-lan.md', 'docs/procurement-offline.md', 'docs/portable-car-layout.md',
     'skills/prompt-to-cad/SKILL.md', 'skills/prompt-to-cad/runtime-design.md', 'skills/prompt-to-cad/runtime-refinement.md', 'skills/prompt-to-cad/runtime-architecture.md',
     'skills/engineering-verification/SKILL.md', 'skills/engineering-verification/runtime-verify.md', 'skills/engineering-verification/runtime-repair.md', 'skills/engineering-verification/runtime-plan.md', 'tests/studio-electrical-fixture.mjs', 'tests/studio-electrical-e2e.mjs', 'tests/studio-electrical-live-e2e.mjs', 'docs/electrical-workflow.md',
@@ -162,7 +163,7 @@ def scan_bytes(name, data):
         errors.append('credential-bearing HTTP URL')
     if name == '.env.example':
         lines = [line for line in text.splitlines() if line and not line.startswith('#')]
-        if any(line not in {'OLLAMA_URL=', 'QWEN_MODEL=', 'M4KE_INFERENCE_PROVIDER=', 'PORT=4173', 'M4KE_ALLOW_WEB=', 'M4KE_SEARCH_URL=', 'M4KE_SEARCH_ENGINES='} for line in lines):
+        if any(line not in {'OLLAMA_URL=', 'QWEN_MODEL=', 'M4KE_INFERENCE_PROVIDER=', 'PORT=4173', 'M4KE_ALLOW_WEB=', 'M4KE_SEARCH_URL=', 'M4KE_SEARCH_ENGINES=', 'M4KE_PROCUREMENT_SNAPSHOT_SHA256='} for line in lines):
             errors.append('environment example contains nonblank runtime configuration')
     return errors
 

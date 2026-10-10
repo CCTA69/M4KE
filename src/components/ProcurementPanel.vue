@@ -60,6 +60,14 @@ type Entry = {
   }[];
 };
 type Snapshot = {
+  soundCarReference?: {
+    scope: string;
+    pricedLineCount: number;
+    missingLineCount: number;
+    totalCarCny: null;
+    partialSubtotals: { tax: string; amount: string }[];
+    lines: { catalogId: string; mpn: string; installedQuantity: number; orderQuantity: number; unit: string; status: string; subtotal: string | null }[];
+  };
   schemaVersion: number;
   available: boolean;
   status: string;
@@ -78,8 +86,7 @@ type Snapshot = {
   engineeringQualified: boolean;
   limitations: string[];
 };
-const snapshot = ref<Snapshot | null>(null),
-  PIN = "10274e8058359c921c6880058ea51f8856e4be409b551abf11d78d1de95a64b4";
+const snapshot = ref<Snapshot | null>(null);
 async function refresh() {
   busy.value = true;
   error.value = "";
@@ -89,7 +96,7 @@ async function refresh() {
     if (
       d.schemaVersion !== 1 ||
       !d.available ||
-      d.snapshotSha256 !== PIN ||
+      !/^[a-f0-9]{64}$/.test(d.snapshotSha256) ||
       d.status !== "VERIFIED_OFFLINE_SNAPSHOT" ||
       d.evidenceIntegrity !== "PASS" ||
       d.semanticClaimsVerified !== false ||
@@ -100,7 +107,7 @@ async function refresh() {
       d.purchaseMade !== false ||
       d.engineeringQualified !== false ||
       !Array.isArray(d.entries) ||
-      d.entries.length !== 4 ||
+      d.entries.length < 1 || d.entries.length > 100 ||
       !Array.isArray(d.limitations)
     )
       throw Error(
@@ -126,6 +133,12 @@ async function refresh() {
       throw Error(
         "Supplier entries lack provenance or qualification boundary.",
       );
+    if (d.soundCarReference && (
+      d.soundCarReference.scope !== "REFERENCE_KIT_NOT_ACTIVE_PROJECT_BOM" ||
+      d.soundCarReference.totalCarCny !== null ||
+      !Array.isArray(d.soundCarReference.lines) || d.soundCarReference.lines.length !== 7 ||
+      !Array.isArray(d.soundCarReference.partialSubtotals)
+    )) throw Error("Reference car pricing contract mismatch.");
     snapshot.value = d;
   } catch (e) {
     error.value = (e as Error).message;
@@ -163,6 +176,24 @@ onMounted(() => void refresh());
         {{ snapshot.ttlHours }}h · {{ snapshot.checkedAt }}
       </p>
       <code>{{ snapshot.snapshotSha256 }}</code>
+      <article v-if="snapshot.soundCarReference" class="card" data-testid="car-price-coverage">
+        <h3>{{ s.t("声控车参考清单 · 人民币", "Sound-car reference · CNY") }}</h3>
+        <p>{{ s.t("这是参考套件，不是当前项目的完整清单。", "Reference kit, not the active project's complete BOM.") }}</p>
+        <p>{{ s.t("可计算参考价格", "Usable indicative prices") }}: {{ snapshot.soundCarReference.pricedLineCount }}/7 ·
+          {{ s.t("缺失或不可报价", "Missing or unquotable") }}: {{ snapshot.soundCarReference.missingLineCount }}</p>
+        <p><strong>{{ s.t("整车总价：未知", "Whole-car total: UNKNOWN") }}</strong></p>
+        <p v-for="subtotal in snapshot.soundCarReference.partialSubtotals" :key="subtotal.tax">
+          {{ s.t("仅已报价部分（不含运费）", "Priced portion only (shipping excluded)") }}:
+          CNY {{ subtotal.amount }} · {{ s.t("税", "Tax") }}: {{ subtotal.tax }}
+        </p>
+        <ul>
+          <li v-for="line in snapshot.soundCarReference.lines" :key="line.catalogId">
+            {{ line.mpn }} · {{ s.t("安装数量", "Installed") }} {{ line.installedQuantity }} ·
+            {{ s.t("订购单位", "Order units") }} {{ line.orderQuantity }} {{ line.unit }} ·
+            {{ line.status }} · CNY {{ line.subtotal ?? "UNKNOWN" }}
+          </li>
+        </ul>
+      </article>
       <div class="source-grid">
         <article v-for="e in snapshot.entries" :key="e.id" class="card">
           <h3>{{ e.identity.manufacturer }} · {{ e.identity.mpn }}</h3>

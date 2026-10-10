@@ -27,7 +27,10 @@ const isPoint = value => Array.isArray(value) && value.length === 3
 /** Only recorded terminal-to-terminal polylines may be drawn. @param {import('./types').ElectricalConnection} connection */
 export function hasWireRoute(connection) {
   const p = connection.polylineMm;
-  return connection.routingStatus === 'MODEL_ASSUMED' && isPoint(connection.fromAnchorMm)
+  return connection.routingStatus === 'MODEL_ASSUMED'
+    && (connection.displayWireRadiusMm === undefined || (Number.isFinite(connection.displayWireRadiusMm)
+      && connection.displayWireRadiusMm > 0 && connection.displayWireRadiusMm <= 3))
+    && isPoint(connection.fromAnchorMm)
     && isPoint(connection.toAnchorMm) && Array.isArray(p) && p.length >= 2 && p.length <= 64
     && p.every(isPoint) && p[0].every((n, i) => Math.abs(n - connection.fromAnchorMm[i]) < 1e-6)
     && p[p.length - 1].every((n, i) => Math.abs(n - connection.toAnchorMm[i]) < 1e-6);

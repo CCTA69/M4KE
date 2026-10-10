@@ -1,0 +1,98 @@
+M4KE coordination — 2026-10-10
+Append new dated messages. Do not overwrite another contributor's section.
+
+CONFIRMED WORK SPLIT
+- Teammate: 1688 acquisition/scraper and its own PR. Keep existing library dimensions and assets intact.
+- This agent: local inference preflight/benchmark, car driving simulation, dimensional report, tests and independent PR.
+- Shared boundaries: no bulk resets, no automatic merges, no deletion of teammate files.
+- Sync policy confirmed by user: code through PRs; deploy to DGX only after explicit confirmation.
+- Network: direct LAN only. The expired tunnel is not a fallback.
+- Public PRs: clean public history only; no credentials, user data, model weights or unlicensed CAD assets.
+
+INITIAL STATUS
+- Root checkout has pre-existing modified/untracked files; all preserved.
+- Public source checkout: deploy/github-public-20260929. Fetch current main before branching.
+- Current authored car envelope recorded in README: 286 x 182 x 76 mm; model-file cross-check pending.
+- Direct SSH currently times out before authentication; remote hardware/model benchmark not yet performed.
+- Simulation is an approximate sandbox, not a physical-test certificate or firmware validation.
+
+TEAMMATE HANDOFF REQUEST
+Please append your PR URL and owned paths here. Prefer adding scraper modules behind a stable input/output
+contract instead of editing inference or viewport internals. Include source URL, capture time, currency,
+variant, dimensions/units, evidence status and license for each acquired component. Do not place secrets here.
+
+UPDATE 2026-10-10 — local runtime / wheel simulation
+- All existing teammate files and printed geometry are unchanged.
+- Native car envelope cross-check: 38 STLs, 188858 triangles, 286 x 182 x 76 mm.
+- Local-only startup guard, local model contract benchmark and Three.js/Rapier sandbox implemented.
+- Wheels rotate by actual travel/radius; paired rim/tyre pivots, contact-gated traction, braking and obstacle stop.
+- No cloud fallback, external-CDN runtime or production-project writes in these new paths.
+- Clean PR branch: codex/local-model-driving-sandbox; URL to follow.
+- Source tests: 495 passed / 22 existing asset skips / 3 missing-OpenSSL environment failures.
+- Vue build, 18 workspace + 16 electrical + 14 viewport browser cases and wheel sandbox browser passed; 11 archive tests passed.
+- Teammate PR https://github.com/frabcd/M4KE/pull/1 found. It is an offline reviewed-evidence importer, not a live 1688 scraper. No merge performed.
+- Shared-file overlap: scripts/check-submission.py and source manifest. Preserve BOTH allowlist additions when merging.
+- DGX not deployed: old pinned key belongs to the loopback-only remote SSH service, not the direct SSH service. Direct-host identity still requires confirmation. No credentials sent, keys overwritten or model downloads started.
+- Deployment remains manual after user confirmation. Please append, not overwrite.
+
+PR HANDOFF 2026-10-10
+- Our draft PR: https://github.com/frabcd/M4KE/pull/2
+- Branch: codex/local-model-driving-sandbox
+- Commit: b483bed32e58fc02af66e77297afe6046380d410
+- No merge/deployment performed. Readiness and unverified DGX items are documented in the PR.
+- Coordinate source allowlist + manifest with PR #1; keep both feature sets.
+
+VALIDATION UPDATE 2026-10-10
+- PR #2 revision: 43393989fc4289bd96adc5f64192f6032e18e757.
+- GitHub Source checks PASS: https://github.com/frabcd/M4KE/actions/runs/38040245583.
+- Initial browser cold-cache race fixed with a Vite virtual fixture and separate cache, without weakening CSP/assertions.
+- All four locked-dependency browser suites passed consecutively on Windows.
+- Updated source ZIP: .setup/M4KE-local-wheel-sandbox-20261010-r2.zip; SHA256 a6aa9653d1a6bb2bc9d85289f71d1ddfdc48d69211d6a7aa3331f83cf3ef95a6.
+- Still no merge or DGX deployment. Print geometry and teammate files unchanged.
+
+
+PR #3 REVIEW / 2026-10-10
+- PR: https://github.com/frabcd/M4KE/pull/3 ; reviewed head 4ab4ba001c16db35cdfe7d31e02d275ea92d8801.
+- REQUEST_CHANGES: P2 in server/studio-procurement.mjs line 6. The module-level snapshot pin is captured before server/index.mjs loads .env. Reproduced .env pin 84c83ae3... but HTTP uses historical 10274e80... and returns 503 / 0 entries.
+- Teammate action: resolve/freeze one pin after environment loading and pass it consistently to HTTP and MCP; add real .env startup regression.
+- Focused local tests: 32 PASS / 7 private-fixture SKIP / 0 FAIL. GitHub CI was action_required, not a passed run.
+- The data covers old sound-car-v1, NOT the authored ECHO F1 CN v2 BOM; do not relabel it.
+- Review only: no teammate edits, no merge, no DGX deployment.
+
+
+协作交接 / 2026-10-10 / 最新状态优先于上方历史记录
+==================================================
+一、分工
+- 采购队友：PR #1 的 1688 证据导入、PR #3 的人民币价格覆盖；修复 PR #3 已提交的 .env 启动配置问题。
+- 本代理：PR #2 的 DGX 本地运行入口、模型任务评测、行驶仿真，以及 ECHO F1 制作版源码打包。
+- 模型库与尺寸仍由模型库队友负责；不通过价格条目自动替换设计零件。
+
+二、公开代码入口
+- 本地化/轮组仿真及制作版：https://github.com/frabcd/M4KE/pull/2
+- 1688 已审阅数据导入：https://github.com/frabcd/M4KE/pull/1
+- 人民币参考价格：https://github.com/frabcd/M4KE/pull/3
+- ECHO F1 生成与排盘命令：cad/designs/README.md
+- 独立 DGX 启动/验收：docs/dgx-only-offline.md
+
+三、制作版交付范围
+- CAD 参数化源码、两版 ESP32 固件、制作页面、逐步装配动画、电路显示、排盘与配色源码和相关回归。
+- builds/ 中的生成模型、3MF、切片、私人检查记录不进源码 Git；运行生成脚本在本机创建。厂家资源、供应商原始资产单独准备，不冒充有再分发授权。
+- 旧版与 CN v2 分开保留，不修改已经打印的零件尺寸。CN v2 整车模型外廓 286 x 182 x 76 mm。
+- 轮组角度根据实际位移/半径计算；是平地无滑动近似，不是悬挂/轮胎动力学或实车合格证明。
+
+四、明确未完成
+- DGX 直连身份确认、122B/MiniMax 实测、断网关闭开发电脑后的 DGX 冷启动全流程仍未验收。
+- PR #3 目前只有旧 sound-car-v1 的参考价，不能称为 CN v2 完整 BOM；三条观察不是可下单的实时价格。
+- 不自动合并、不自动部署、不下单、不发打印任务。部署须项目负责人确认。
+
+五、协作规则
+- 每人独立分支 + PR；更新本文件只追加日期、负责范围、进度、验证和下一步。
+- 不做 git reset/clean 覆盖别人的工作，不批量改库尺寸，不提交密码、地址、会话、模型权重或原始供应商页面。
+- 合并三个 PR 时保留 scripts/check-submission.py 的全部新增白名单；最后重新生成 SUBMISSION-MANIFEST.json，不直接选择一方整文件覆盖。
+- 留言格式：日期 / 负责人 / PR 与提交 / 改动路径 / 测试 / 阻塞 / 需要谁处理。
+
+发布前源码检查 / 2026-10-10
+- 补齐制作版后：189 个 JS/TS/Vue 文件检查、类型检查、生产构建通过；37 项接口/线路/轮组/服务回归通过；两版纯固件 13 + 8 项通过；四套浏览器回归连续通过。23 个新增 Python 文件通过语法解析。
+- 上传仅包含可公开源码和说明，不把已有 STL/3MF/切片或私人证据装成源代码。没有运行新 CAD 生成或发送硬件指令。
+- 新公开源码明确提示 AMS 槽位是历史示例，必须按当前实装料卷确认材质和映射。
+

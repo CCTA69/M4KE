@@ -105,6 +105,7 @@ EXACT = {
     'printing/dgx/test_adapter.py', 'printing/dgx/make_smoke_fixture.py',
     'printing/bambu_handoff.py', 'printing/lan-monitor.mjs',
     'procurement/snapshot.mjs', 'procurement/import.mjs', 'procurement/SCHEMA.md',
+    'procurement/1688-import.mjs', 'docs/1688-import.md',
     'procurement/car-prices.mjs', 'procurement/install-china-car-observations.mjs', 'tests/procurement-e2e.mjs',
     'procurement/echo-cn-bom.mjs', 'procurement/echo-cn-prices.mjs', 'procurement/install-echo-cn-observations.mjs',
     'docs/printer-lan.md', 'docs/procurement-offline.md', 'docs/portable-car-layout.md',

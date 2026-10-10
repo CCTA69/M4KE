@@ -59,6 +59,38 @@ Use [SearXNG's installation documentation](https://docs.searxng.org/admin/instal
 
 The deployed network smoke found Espressif's official DevKitC documentation and then served the same query from cache. This is source discovery, not verification of the current project's board variant. Search providers and sites can be unavailable or challenge requests; the application does not bypass those challenges.
 
+### Bringing a new installation online
+
+The historical smoke above does not establish that search is available on a new
+installation. Check the actual search service before enabling model research:
+
+1. Install SearXNG on the DGX using the official container instructions linked
+   above. Bind its published port to `127.0.0.1:18080`, not all interfaces. Record
+   the selected image digest and keep the generated secret outside source Git.
+2. In SearXNG's `settings.yml`, enable `json` in `search.formats` alongside `html`.
+   A default HTML-only instance cannot serve this adapter's JSON requests.
+3. From the DGX, test a non-private component query:
+
+   ```sh
+   curl --fail --max-time 20 --get http://127.0.0.1:18080/search \
+     --data-urlencode 'q=ESP32 DevKitC datasheet dimensions' \
+     --data 'format=json'
+   ```
+
+4. Only after this returns usable results, start M4KE with the opt-in variables
+   above. Open **Model & material library → Source research**, run the same query,
+   and repeat it to check that the second response is marked as a local cache hit.
+5. A fresh AI design can choose searches only for identified catalog/library
+   components. Restore the reviewed local component library first; the public
+   source ZIP deliberately does not contain supplier CAD. Do not treat a blank
+   library, unreachable gateway or zero search hits as successful research.
+
+`npm run start:offline` intentionally disables network research even if the shell
+contains `M4KE_ALLOW_WEB=1`. Use `npm start` for the explicitly enabled research
+mode; local model inference remains local in either mode. Searching does not
+automatically admit third-party geometry, establish a current price, purchase
+parts or upload the user's full design brief.
+
 ## Regression commands
 
 ```sh

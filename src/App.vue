@@ -264,8 +264,8 @@ async function create() {
         <p>
           {{
             s.t(
-              "一个工作区对应一个设计项目，文件和模型在 DGX 上。",
-              "One workspace, one design project. Files and CAD stay on your DGX.",
+              "一个工作区对应一个设计项目，文件保存在运行 M4KE 的设备上；部署到 DGX 后即可独立使用。",
+              "One workspace, one project. Files stay on the device running M4KE; deploy it on your DGX for standalone use.",
             )
           }}
         </p>

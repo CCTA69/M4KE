@@ -3,12 +3,17 @@ import { readImportedSnapshot } from '../procurement/import.mjs';
 import { quoteLine } from '../procurement/snapshot.mjs';
 import { soundCarPriceCoverage } from '../procurement/car-prices.mjs';
 
-export const PROCUREMENT_SNAPSHOT = process.env.M4KE_PROCUREMENT_SNAPSHOT_SHA256 || '10274e8058359c921c6880058ea51f8856e4be409b551abf11d78d1de95a64b4';
+// Historical default only. Do not read environment while static imports evaluate.
+export const PROCUREMENT_SNAPSHOT = '10274e8058359c921c6880058ea51f8856e4be409b551abf11d78d1de95a64b4';
+export function resolveProcurementSnapshot(value = process.env.M4KE_PROCUREMENT_SNAPSHOT_SHA256 || PROCUREMENT_SNAPSHOT) {
+  if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) throw Error('Procurement snapshot must be SHA256.');
+  return value;
+}
 const TTL_HOURS = 24;
 
 /** Read-only, one explicitly reviewed snapshot. No user-selected file or supplier URL. */
-export function createProcurementService({ root, json, now = () => Date.now(), snapshotSha256 = PROCUREMENT_SNAPSHOT }) {
-  if (typeof snapshotSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(snapshotSha256)) throw Error('Procurement snapshot must be SHA256.');
+export function createProcurementService({ root, json, now = () => Date.now(), snapshotSha256 = resolveProcurementSnapshot() }) {
+  resolveProcurementSnapshot(snapshotSha256);
   let activeReads = 0;
   return async function handle(req, res, pathname) {
     if (pathname !== '/api/studio/procurement' || req.method !== 'GET') return false;

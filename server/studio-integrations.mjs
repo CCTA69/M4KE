@@ -5,7 +5,7 @@ import {createWebResearch} from './studio-web-research.mjs';
 import { fileURLToPath } from 'node:url';
 import { readFile, lstat, realpath } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { createProcurementService, PROCUREMENT_SNAPSHOT } from './studio-procurement.mjs';
+import { createProcurementService, resolveProcurementSnapshot } from './studio-procurement.mjs';
 import { quoteImportedSnapshot } from '../procurement/import.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
@@ -46,11 +46,12 @@ async function sourceInspection(root) {
   } catch { return { status: 'SOURCE_NOT_PRESENT_OR_UNREADABLE', verifiedFiles: count }; }
 }
 
-export function createIntegrationRuntime({ root = ROOT, now = () => Date.now() } = {}) {
+export function createIntegrationRuntime({ root = ROOT, now = () => Date.now(), snapshotSha256 = resolveProcurementSnapshot() } = {}) {
+  resolveProcurementSnapshot(snapshotSha256);
   const research=createWebResearch({root,now});
   async function cached() {
     let result;
-    await createProcurementService({ root, now, json: (_res, status, value) => { result = { status, value }; } })({ method: 'GET' }, {}, '/api/studio/procurement');
+    await createProcurementService({ root, now, snapshotSha256, json: (_res, status, value) => { result = { status, value }; } })({ method: 'GET' }, {}, '/api/studio/procurement');
     return result.value;
   }
   async function inventory() {
@@ -62,7 +63,7 @@ export function createIntegrationRuntime({ root = ROOT, now = () => Date.now() }
         absentCapabilities: ['MCP server', 'editable schematic', 'PCB routing', 'Gerber export', 'dimensioned STEP/STL download'] },
       capabilities: {
         modelLibrary: library,
-        cachedPartSearch: { status: prices.available ? 'AVAILABLE' : 'SNAPSHOT_UNAVAILABLE', entries: prices.entries.length, snapshotSha256: PROCUREMENT_SNAPSHOT },
+        cachedPartSearch: { status: prices.available ? 'AVAILABLE' : 'SNAPSHOT_UNAVAILABLE', entries: prices.entries.length, snapshotSha256 },
         cachedQuantityQuote: { status: prices.available ? 'AVAILABLE_SUBJECT_TO_FRESHNESS_AND_FIELDS' : 'SNAPSHOT_UNAVAILABLE', ttlHours: 24 },
         liveSupplierLookup: { status: research.status().enabled ? 'SEARCH_GATEWAY_CONFIGURED_NOT_LIVE_QUOTE' : 'NOT_CONNECTED', reason: 'Search leads require source review; no automatic price or geometry adoption.' },
         pcbAuthoring: { status: 'MISSING_PROVIDER', reason: 'The supplied archive does not implement PCB authoring. Supply the separate provider repository or DGX-local entrypoint.' },
@@ -83,7 +84,7 @@ export function createIntegrationRuntime({ root = ROOT, now = () => Date.now() }
       if (typeof query !== 'string' || query.length > 150 || /[\u0000-\u001f]/.test(query) || !Number.isSafeInteger(limit) || limit < 1 || limit > 8) throw Error('Invalid query or limit.');
       const result = await cached(), terms = query.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
       const entries = result.entries.filter(e => terms.every(t => JSON.stringify({ identity: e.identity, kind: e.kind, specs: e.specs }).toLocaleLowerCase().includes(t))).slice(0, limit);
-      return { status: result.status, snapshotSha256: PROCUREMENT_SNAPSHOT, query, entries, ttlHours: 24, ...BOUNDARIES, sourceContentIsData: true };
+      return { status: result.status, snapshotSha256, query, entries, ttlHours: 24, ...BOUNDARIES, sourceContentIsData: true };
     }
     if (name === 'quote_cached_part') {
       argsOnly(args, ['entryId', 'quantity']);
@@ -94,7 +95,7 @@ export function createIntegrationRuntime({ root = ROOT, now = () => Date.now() }
       if (!entry) return { status: 'NOT_FOUND', unitPrice: null, subtotal: null, ...BOUNDARIES };
       if (!entry.identity.supplierSku || !entry.price.unit || !entry.price.currency) return { status: 'UNQUOTABLE', entryId: entry.id, unitPrice: null, subtotal: null, ...BOUNDARIES };
       try {
-        const quote = await quoteImportedSnapshot(PROCUREMENT_SNAPSHOT, { entryId: entry.id, manufacturer: entry.identity.manufacturer, mpn: entry.identity.mpn, supplierSku: entry.identity.supplierSku, variant: entry.identity.variant, quantity: args.quantity, unit: entry.price.unit, currency: entry.price.currency }, { root: path.join(root, 'procurement'), now: now(), maxAgeHours: 24 });
+        const quote = await quoteImportedSnapshot(snapshotSha256, { entryId: entry.id, manufacturer: entry.identity.manufacturer, mpn: entry.identity.mpn, supplierSku: entry.identity.supplierSku, variant: entry.identity.variant, quantity: args.quantity, unit: entry.price.unit, currency: entry.price.currency }, { root: path.join(root, 'procurement'), now: now(), maxAgeHours: 24 });
         return { ...quote, ...BOUNDARIES };
       } catch { return { status: 'SNAPSHOT_UNAVAILABLE', unitPrice: null, subtotal: null, ...BOUNDARIES }; }
     }
@@ -104,8 +105,8 @@ export function createIntegrationRuntime({ root = ROOT, now = () => Date.now() }
 }
 
 /** The web application can expose discovery without opening arbitrary tools or mutation routes. */
-export function createIntegrationsService({ root = ROOT, json, body, now } = {}) {
-  const runtime = createIntegrationRuntime({ root, now });
+export function createIntegrationsService({ root = ROOT, json, body, now, snapshotSha256 = resolveProcurementSnapshot() } = {}) {
+  const runtime = createIntegrationRuntime({ root, now, snapshotSha256 });
   const research=createWebResearch({root,now});
   let active = false;
   return async (req, res, pathname) => {
@@ -138,6 +139,7 @@ export async function dispatchIntegrationRpc(message, runtime) {
 }
 
 async function stdio() {
+  try { process.loadEnvFile(path.join(ROOT, '.env')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   const runtime = createIntegrationRuntime();
   let pending = Buffer.alloc(0);
   // Async iteration bounds queued requests, unlike unbounded readline event callbacks.

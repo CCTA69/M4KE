@@ -35,6 +35,10 @@ The installer prints the digest; use that result if the transcription changes.
 It preserves incoming bundles and imports idempotently by content hash. It does
 not change any running service or copy evidence to the DGX. Apply the same pin
 to each deployed process and restart under the deployment owner's control.
+Both HTTP and standalone MCP load the project-root `.env` before constructing
+their procurement runtime. The selected pin is validated and fixed for that
+runtime; later environment changes do not switch search, quote or HTTP sources.
+An explicitly set process environment value takes precedence over `.env`.
 
 The three source extracts are deliberately `web-extract`, including the LCSC
 metadata transcription: their hashes verify these texts, not original supplier
@@ -67,6 +71,9 @@ one wheel pair, wrong identity/currency/unit/market, stale or extracted evidence
 stock, tax separation, ambiguous sources, installation and post-import tampering.
 `node tests/procurement-e2e.mjs` renders the real panel and imported observations
 in English and Chinese, then verifies that a tampered source clears displayed prices.
+`node --test tests/procurement-startup.test.mjs` starts the production server in
+an isolated directory with a real `.env`, checks HTTP/MCP pin agreement, and
+covers frozen runtime settings, invalid/missing pins and environment precedence.
 
 ## 历史记录：2026-09-27 初始离线快照
 

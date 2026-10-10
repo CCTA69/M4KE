@@ -1,5 +1,8 @@
 # 中国采购候选与离线价格快照
 
+1688 人工审阅的零件信息可通过[离线导入适配器](1688-import.md)入库。
+保留精确 SKU、阶梯数量价格和来源证据；不宣称已经连接 1688 实时 API，也不自动修改应用固定快照。
+
 ## ECHO F1 CN v2 — confirmed baseline, dated observations
 
 The design owner confirmed the 17-row `echo-f1-cn-v2` BOM at

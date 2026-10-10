@@ -117,3 +117,19 @@ COOP3 回复与合并准备 / 2026-10-10
 - COOP3 负责另开 CN v2 证据/价格后续 PR；不要把 PR #3 的旧参考价格改名当成本车价格。
 - 我方 PR #2 提交 65ecd8e 的 GitHub Source checks 已通过：https://github.com/frabcd/M4KE/actions/runs/38044200452 。本次说明更新后需查看新提交检查。
 - 用户现在要求推进代码合并；先完成 PR #2 的源码合并，PR #1/#3 继续做集成/CI 检查。代码合并与 DGX 部署、模型/实体车验收分开，未测试的项目保持未完成。
+
+INTEGRATED HANDOFF / 2026-10-10 / supersedes older status entries
+===============================================================
+- PR #2 merged at 3144145a52ce4d46e1c80bbe09c1b940d552a5f6; PR #3 merged at 11f4be1fd203d75d3cc085ed19eaef15a968c26c; PR #4 merged at 1abe0485a584289fb1bb989dbd1958b8a66955c9.
+- PR #1 reviewed head 988d0d3ac132f6842bb74ddd66cfce628baa048e: three new files restored byte-for-byte from the reviewed PR blobs; shared procurement docs, package allowlist and package-test conflicts resolved additively against current main. This integration preserves the original head as a parent and retains all current-main changes.
+- Importer scope: operator-reviewed 1688 evidence only. No live crawler, purchase, supplier geometry admission or catalog replacement.
+- Baseline validation: 198 JS/TS/Vue files checked; Vue typecheck and production build PASS; 12 Python package tests PASS; six browser suites PASS (workspace, electrical, viewport, driving sandbox, historical pricing, CN v2 pricing).
+- Earlier current-main baseline source run: 531 PASS, 22 private-fixture SKIP, 3 FAIL exclusively because OpenSSL CLI is absent (spawn openssl ENOENT). Those TLS tests were not removed or relabelled. Original PR #1 Linux Source checks PASS; current integration must pass its own CI before merge.
+- Conflict-resolution follow-up: all six 1688 importer tests PASS; 200-source recursive check, Vue typecheck/build and 12 package tests PASS. Full integrated source: 537 PASS, 22 private-fixture SKIP, the same 3 missing-OpenSSL failures; no assertion disabled. Linux CI remains the merge gate.
+- The source manifest is regenerated from this integrated source. Original private Git history, model weights, operational settings, user projects and supplier CAD remain excluded.
+- Local UI preview is available, but a rendered interface is not a successful real-model run. Current direct DGX SSH identity is not independently verified. No trust records cleared, no expired remote tunnel used, no DGX application deployment performed.
+- Installed model tags were observed on the user-designated LAN service; 122B/35B model quality and fresh end-to-end generation have NOT been benchmarked in this integration.
+- Local web-research/MCP code remains opt-in. New-install gateway + JSON output + cache-hit acceptance steps are in docs/qwen-workflow-update.md. Until actual DGX setup is tested, do not label network research operational.
+- Next owners: maintainer reviews/merges this integration after CI; device operator confirms direct SSH host identity; then prepare isolated DGX deployment and fresh prompt -> model research -> draft -> Qwen repair -> explicit verification test. User confirmation is still required before replacing the DGX application.
+- Procurement teammate: continue exact-SKU evidence/price PRs. Model-library teammate: confirm physical dimensions separately; do not derive fit from supplier search snippets. Printed geometry and existing firmware are unchanged here.
+

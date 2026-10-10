@@ -48,7 +48,7 @@ class PackageTests(unittest.TestCase):
                      '.github/workflows/ci.yml', 'scripts/check-source.mjs', 'scripts/test-source.mjs',
                      'procurement/car-prices.mjs', 'procurement/install-china-car-observations.mjs',
                      'procurement/echo-cn-bom.mjs', 'procurement/echo-cn-prices.mjs', 'procurement/install-echo-cn-observations.mjs',
-                     'tests/procurement-e2e.mjs']:
+                     'tests/procurement-e2e.mjs', 'procurement/1688-import.mjs', 'docs/1688-import.md']:
             self.assertTrue(module.check.allowed_name(name), name)
 
     def test_nested_vue_sources_are_allowed_without_private_or_dependency_trees(self):

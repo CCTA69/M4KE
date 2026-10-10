@@ -14,6 +14,7 @@ ROOT_FILES = {
     'CONTRIBUTING.md', 'SECURITY.md', '.editorconfig', '.gitattributes',
 }
 SERVER_FILES = {
+    'server/browser-policy.mjs',
     'server/index.mjs',
     'server/studio-architecture-plan.mjs',
     'server/studio-candidate-context.mjs',
@@ -49,6 +50,9 @@ SERVER_FILES = {
     'server/studio-verification-plan.mjs',
 }
 EXACT = {
+    'scripts/benchmark-local-contracts.mjs', 'scripts/dgx-preflight.py', 'scripts/start-offline.mjs',
+    'shared/driving-sandbox.mjs', 'shared/local-model-cases.mjs', 'tests/driving-sandbox-browser.mjs',
+    'docs/dgx-only-offline.md', 'docs/local-sandbox-validation.md',
     'scripts/codex-demo-bridge.mjs', 'docs/codex-online-demo.md', 'docs/qwen-workflow-update.md',
     'scripts/benchmark-local-models.mjs', 'tests/cad_hole_depth_test.py', 'docs/model-runtime-comparison.md', 'DESIGN.md',
     'shared/car-contract.mjs',

@@ -8,6 +8,7 @@ export {validateEndpoint,validateModel,validateProvider} from './studio-inferenc
 import { CAR_PROMPT, validateCar } from '../shared/car-contract.mjs';
 import {createStudioService} from './studio-service.mjs';
 import {sendArtifact} from './studio-http.mjs';
+import {BROWSER_CSP} from './browser-policy.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 try { process.loadEnvFile(path.join(root, '.env')); } catch (error) { if (error.code !== 'ENOENT') console.warn('Could not load .env:', error.message); }
@@ -156,7 +157,7 @@ export function createServer() {
   const studio=createStudioService({root,getSettings:()=>settings,localFetch,getModels,body,json});
   return http.createServer(async (req,res) => {
     res.setHeader('X-Content-Type-Options','nosniff'); res.setHeader('Referrer-Policy','no-referrer');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self' data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
+    res.setHeader('Content-Security-Policy', BROWSER_CSP);
     const host = req.headers.host || '';
     if (!/^(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/.test(host)) return json(res,403,{error:'Local host access only.'});
     if (req.headers.origin && req.headers.origin !== `http://${host}` && req.headers.origin !== `https://${host}`) return json(res,403,{error:'Cross-origin requests are disabled.'});

@@ -11,7 +11,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const out=path.resolve(process.env.M4KE_TEST_OUTPUT||path.join(root,'test-results','vue-electrical-ui-'+Date.now()));await mkdir(out,{recursive:true});
 const vite=await createServer({root,server:{host:'127.0.0.1',port:0}});await vite.listen();
 const base=`http://127.0.0.1:${vite.httpServer.address().port}`;
-const browser=await chromium.launch({...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{}),headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const browser=await chromium.launch({...(process.env.M4KE_BROWSER_EXECUTABLE||process.platform==='win32'?{executablePath:process.env.M4KE_BROWSER_EXECUTABLE||'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{}),headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const page=await browser.newPage({viewport:{width:1440,height:1100}});
 await page.addInitScript(()=>localStorage.setItem('m4ke-studio-language','en'));
 const errors=[],results=[],writes=[],assets=[];page.on('pageerror',e=>errors.push(e.message));

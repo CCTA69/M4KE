@@ -119,6 +119,68 @@ snapshot, mix these candidate amounts with the CNY 566 budget, or publish a
 whole-car total from this table. The DFR0034 22×30 versus 22×32 mm conflict also
 remains open.
 
+### Kit subcomponents and rejected matches — follow-up 2026-10-10
+
+The following four leads cover **parts of two kit rows**, not four additional
+BOM rows. They remain unselected. None establishes a complete kit price or changes
+the runtime's 3/17 observations. Amounts are CNY advertised prices reviewed from
+public web extractions; freshness, checkout stock, tax and delivery remain unknown.
+
+| BOM row / subcomponent | Seller reference and purchase unit | Conditional package arithmetic | Evidence still missing |
+| --- | --- | --- | --- |
+| `wiring-kit` / signal jumpers | [DFRobot-store FIT0030](https://www.dfrobot.com.cn/goods-366.html), **6.00 per pack of ten** female-female 20 cm wires; brand unspecified/other | Ten wires per purchased pack; the BOM does not fix the required signal-wire count, so no pack count or bundle subtotal is assigned | The listing does not establish 26 AWG or the required connector pitch. It does not supply the separate prepared 22 AWG motor/power leads or terminal set. Never qualify these as motor power wires from the advertised current alone. |
+| `wiring-kit` / terminal lead | [DFRobot FIT0452 / XPE012](https://www.dfrobot.com.cn/goods-1184.html), **1.00 per two-position connector** | Four connectors would be 4.00 if the design owner accepts this exact part; this is not the wiring-kit price | Search extraction identifies a two-position quick connector, but does not establish the required lever mechanism, compatible stranded-wire gauges, stripping/termination rules or dimensions. Keep unqualified pending those checks. |
+| `fasteners` / M3×10 screws | [DFRobot-store FIT0270](https://www.dfrobot.com.cn/goods-931.html), **5.00 per ten screw-and-nut sets**; stainless, round hex-socket head, brand unspecified/other | Twelve screws require two packs: 10.00 for twenty screws and twenty ordinary nuts, with eight screws spare | Head envelope, thread specification and exact placement still require owner confirmation. Included nuts are not evidence of washers or nylon locknuts. |
+| `fasteners` / M3×30 screws | [DFRobot-store FIT0269](https://www.dfrobot.com.cn/goods-935.html), **8.00 per ten screw-and-nut sets**; stainless, round hex-socket head, brand unspecified/other | Six screws require one pack: 8.00, with four screws spare | The listing does not specify unthreaded shoulder length. Do not approve these as front axles without checking bearing contact, head clearance and the authored shoulder preference. |
+
+The two screw-pack amounts would sum to **18.00 for those packs only**. They do
+not complete `fasteners`: four M3×12 countersunk screws, twenty washers, two nylon
+locknuts and two spacers (3.2 mm ID, ≤5 mm OD, 3 mm long) still need exact listings
+and fit review. If both screw candidates are accepted, their packs already supply
+thirty ordinary nuts; do not also charge for twenty more ordinary nuts. Keep the
+purchase quantities separate from installed quantities and distinguish ordinary
+nuts from the two required locknuts.
+
+Evidence access: FIT0030 opened (reported crawl: today); FIT0269 opened (two
+months). FIT0270 was readable as a product search extraction (three months), but
+direct open failed. FIT0452 was readable as a product search extraction (two
+months), but direct open timed out. Search-result stock claims were not promoted
+to verified stock. No supplier page bytes or account information are published.
+
+Two tempting matches were excluded from the authored rows:
+
+- [DFR0029-B](https://www.dfrobot.com.cn/goods-864.html) is a 22×30 mm powered
+  digital-button module. Its footprint exceeds `arm-button`'s ≤15×12 mm outline;
+  this is not the specified small dry-contact assembly. The page opened (one week).
+- [FIT0280](https://www.dfrobot.com.cn/goods-932.html) is M3×12 with a round head,
+  while the four screws in that BOM subline must be countersunk. Matching diameter
+  and length does not close the head-style requirement. The page opened (two weeks).
+
+These exclusions are comparisons with the existing BOM, not instructions to
+redesign its button mount or countersinks. A failed search or missing drawing does
+not establish that a conforming product is unavailable.
+
+**Owner handoff needed to close the remaining gaps:**
+
+1. Supply the existing-cart seller links, brand/SKU, selected variant and pack
+   size for `bearings` and `o-rings`. Redact account, address and order details.
+   Other sellers' 693ZZ prices cannot identify the already chosen four bearings.
+2. Identify the intended flat 8×AA holder, assembled switch/fuse harness and
+   dry-contact button, with drawings and supplied lead-end details. No complete
+   conforming China-priced assembly was established in this research pass.
+3. Confirm the four leads above or return the intended kit SKUs. Specify the
+   missing wire counts/lengths and all fastener subitems before a kit total is
+   calculated; procurement does not invent those design quantities.
+4. For `filament-share`, supply selected spool SKUs and the revision-matched
+   sliced consumption by material/color, including how support/purge waste is
+   counted. The authored material allowance is not measured consumption. For
+   `insulation-ties`, specify the foam area, tie length/count and tape quantity
+   along with the existing 2 mm foam / 2.5 mm tie-width requirements.
+
+The nine unresolved rows listed above remain unresolved. A later evidence-data
+PR must bind confirmed identities and complete purchase units; approval of this
+research alone must not change selected parts, coverage or the snapshot pin.
+
 ## Historical sound-car-v1 — 2026-10-10 China price observations
 
 The existing `sound-car-v1` reference uses one headerless Pico, one Adafruit

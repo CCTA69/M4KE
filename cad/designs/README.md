@@ -139,8 +139,9 @@ The earlier local CN v2 projects passed native import in Bambu Studio 2.8.2.61.
 All four H2C plates completed a local slicing run, with vendor `T` command
 parsing warnings recorded in `checks/print-plates-native.json`. The H2C estimate
 is 419.2 g / 17.2 hours, **not a measurement**. Other printer projects were
-import-tested, not fully sliced. Physical printing, purchased-part fit and road
-tests are still outstanding. No printer has been sent a job.
+import-tested, not fully sliced. These historical results do not establish
+physical print quality, purchased-part fit or road-test success. The generation
+and validation commands in this guide do not send print jobs.
 
 After a native recheck, independently inspect the deposited paths, including
 arc extrema, support and brim widths (not vendor homing/purge motions):

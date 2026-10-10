@@ -65,8 +65,8 @@
       "bytes": 13453
     },
     "cad/designs/README.md": {
-      "sha256": "25ff469f78b7f52b9293fa8b30f6dead7f1dae9905692e4888021ab7ba18d279",
-      "bytes": 7845
+      "sha256": "ff0cb2b8df5ddc7d316ac15c33e391f2c6ab129dedb48c9d597989ffb9d088a3",
+      "bytes": 7921
     },
     "cad/designs/echo_f1.py": {
       "sha256": "35e889471aef304852f960db4cc9bd16dda50e75d2cfb6a535408bd30af16bb3",
@@ -1277,8 +1277,8 @@
       "bytes": 11712
     },
     "texting.txt": {
-      "sha256": "26d08ff362096ce6c4e3e93800ab1f2e49836e7c82d845547fbd8af998d46a72",
-      "bytes": 7602
+      "sha256": "d5bcf02dd185748d1332a2a4bb5a4466c279c2b2122d2db02ad8186de55c4595",
+      "bytes": 8749
     },
     "tsconfig.json": {
       "sha256": "5254b6412d77d8bcbcf50652402d4ee45a1379d3335cb3c155367e886961e51c",

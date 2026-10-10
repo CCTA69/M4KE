@@ -96,3 +96,13 @@ PR #3 REVIEW / 2026-10-10
 - 上传仅包含可公开源码和说明，不把已有 STL/3MF/切片或私人证据装成源代码。没有运行新 CAD 生成或发送硬件指令。
 - 新公开源码明确提示 AMS 槽位是历史示例，必须按当前实装料卷确认材质和映射。
 
+
+PR #3 复审通过 / 2026-10-10 / 后续协作
+====================================
+- 已复审队友修复提交 9d8944d6e2897a42c252130792fef5299fab8861；旧的 .env 静态导入顺序问题已关闭，没有发现新的阻塞项。
+- 已提交 APPROVE：https://github.com/frabcd/M4KE/pull/3#pullrequestreview-5478571251 。未合并、未改队友分支、未部署。
+- 隔离副本实跑采购、价格、HTTP、MCP 与真实 .env 启动回归：42 PASS / 9 私有夹具 SKIP / 0 FAIL。包括环境优先级、pin 冻结及缺失/无效快照失败关闭。
+- GitHub Source checks 仍为 action_required：https://github.com/frabcd/M4KE/actions/runs/38042720111 。合并前由仓库负责人处理 CI；本地通过不能替代 CI 状态。
+- 数据仍是旧 sound-car-v1 参考观察，不是当前 CN v2 完整 BOM 或实时可下单价格。
+- 我方 PR #2 已补入制作版源码：0fc5e6579d694d7e875a667c7bec24188f8dfa86；本文件及打包 manifest 随后追加提交。
+- 下一步：保留三个 PR 的白名单新增项并重生成 manifest；部署仍需用户确认。请在此文件追加你的进展，不覆盖历史。

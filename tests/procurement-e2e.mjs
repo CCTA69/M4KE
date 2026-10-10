@@ -8,15 +8,17 @@ import {createServer} from 'vite';
 import vue from '@vitejs/plugin-vue';
 import {chromium} from 'playwright';
 import {installChinaCarObservations} from '../procurement/install-china-car-observations.mjs';
+import {installEchoCnObservations} from '../procurement/install-echo-cn-observations.mjs';
 import {createProcurementService} from '../server/studio-procurement.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const cnMode = process.env.M4KE_TEST_ECHO_CN === '1';
 const isolated = await mkdtemp(path.join(os.tmpdir(), 'm4ke-prices-ui-'));
 const out = path.join(root, 'test-results', `procurement-${Date.now()}`);
 let vite, browser;
 try {
   await mkdir(out, {recursive:true});
-  const receipt = await installChinaCarObservations({root:path.join(isolated,'procurement')});
+  const receipt = await (cnMode ? installEchoCnObservations : installChinaCarObservations)({root:path.join(isolated,'procurement')});
   const handle = createProcurementService({root:isolated, snapshotSha256:receipt.snapshotId,
     json:(res,status,value)=>{res.writeHead(status,{'content-type':'application/json'});res.end(JSON.stringify(value));}});
   const html = `<!doctype html><html><head><title>Procurement verification</title></head><body><div id="app"></div>
@@ -49,8 +51,17 @@ try {
     assert.equal(await coverage.locator('li').count(),7);
     assert.match(await coverage.innerText(),lang==='en'?/Whole-car total: UNKNOWN/:/整车总价：未知/);
     assert.match(await coverage.innerText(),/0\/7/);
+    assert.match(await coverage.innerText(),lang==='en'?/Historical/:/历史/);
+    const cn=page.getByTestId('echo-cn-price-coverage');await cn.waitFor();
+    assert.equal(await cn.locator('.cn-bom-line').count(),17);
+    assert.match(await cn.innerText(),cnMode?/3\/17/:/0\/17/);
+    assert.match(await cn.innerText(),/CNY 566/);
+    assert.match(await cn.innerText(),lang==='en'?/Whole-car purchase total: UNKNOWN/:/整车采购总价：未知/);
+    const conflict=cn.getByTestId('sensor-dimension-conflict');
+    assert.match(await conflict.innerText(),/22 × 30 mm/);assert.match(await conflict.innerText(),/22 × 32 mm/);
+    assert.match(await conflict.innerText(),/DIMENSIONS_TO_CONFIRM/);
     const body=await page.locator('body').innerText();
-    for(const price of ['29.25','57.48','65.88'])assert(body.includes(price));
+    for(const price of (cnMode?['135.00','40.00','20.00']:['29.25','57.48','65.88']))assert(body.includes(price));
     assert.equal(await page.locator('.source-grid > article').count(),3);
     assert.equal(await page.locator('[role="alert"]').count(),0);
     await page.screenshot({path:path.join(out,`${lang}.png`),fullPage:true});
@@ -63,9 +74,10 @@ try {
   await page.getByRole('button',{name:'重新检查本地证据'}).click();
   await page.getByRole('alert').waitFor();
   assert.equal(await page.getByTestId('car-price-coverage').count(),0);
+  assert.equal(await page.getByTestId('echo-cn-price-coverage').count(),0);
   assert.equal(await page.locator('.source-grid > article').count(),0);
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({status:'PASS',snapshotSha256:receipt.snapshotId,languages:['en','zh'],entries:3,carLines:7,pricedLines:0,tamper:'503 clears prices',screenshots:out}));
+  console.log(JSON.stringify({status:'PASS',mode:cnMode?'CN v2':'historical',snapshotSha256:receipt.snapshotId,languages:['en','zh'],entries:3,cnLines:17,cnObservedLines:cnMode?3:0,tamper:'503 clears prices',screenshots:out}));
 } finally {
   await browser?.close();await vite?.close();
   await rm(isolated,{recursive:true,force:true});

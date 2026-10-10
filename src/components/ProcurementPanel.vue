@@ -60,6 +60,33 @@ type Entry = {
   }[];
 };
 type Snapshot = {
+  echoF1CnV2Reference?: {
+    buildId: string;
+    scope: string;
+    sourceRevision: string;
+    sourceUrl: string;
+    budgetAllocationCny: number;
+    totalCarCny: null;
+    purchaseAuthorized: false;
+    completePricedBom: false;
+    observedLineCount: number;
+    missingObservationCount: number;
+    lines: {
+      id: string;
+      name: string | { appearanceEnabled: string; appearanceDisabled: string };
+      specification: string | { appearanceEnabled: string; appearanceDisabled: string };
+      quantity: number;
+      unit: string;
+      installedQuantity: number | null;
+      packSize: number | null;
+      budgetUnitCny: number;
+      gate: string;
+      status: string;
+      qualifiedForPurchase: false;
+      observation: { amountCny: string; url: string; reviewedAt: string; freshness: string } | null;
+      dimensionConflict: { designMm: number[]; listingMm: number[]; sources: string[]; required: string } | null;
+    }[];
+  };
   soundCarReference?: {
     scope: string;
     pricedLineCount: number;
@@ -139,6 +166,19 @@ async function refresh() {
       !Array.isArray(d.soundCarReference.lines) || d.soundCarReference.lines.length !== 7 ||
       !Array.isArray(d.soundCarReference.partialSubtotals)
     )) throw Error("Reference car pricing contract mismatch.");
+    const cn = d.echoF1CnV2Reference;
+    if (cn && (
+      cn.buildId !== "echo-f1-cn-v2" || cn.scope !== "AUTHORED_BASELINE_NOT_ACTIVE_PROJECT_BOM" ||
+      !/^[a-f0-9]{40}$/.test(cn.sourceRevision) || !safeExternal(cn.sourceUrl) ||
+      cn.budgetAllocationCny !== 566 || cn.totalCarCny !== null ||
+      cn.purchaseAuthorized !== false || cn.completePricedBom !== false ||
+      !Array.isArray(cn.lines) || cn.lines.length !== 17 ||
+      cn.lines.some(line => line.qualifiedForPurchase !== false ||
+        (line.observation && !safeExternal(line.observation.url)) ||
+        (line.dimensionConflict && line.dimensionConflict.sources.some(url => !safeExternal(url)))) ||
+      cn.observedLineCount !== cn.lines.filter(line => line.observation).length ||
+      cn.missingObservationCount !== 17 - cn.observedLineCount
+    )) throw Error("CN v2 baseline pricing contract mismatch.");
     snapshot.value = d;
   } catch (e) {
     error.value = (e as Error).message;
@@ -176,8 +216,46 @@ onMounted(() => void refresh());
         {{ snapshot.ttlHours }}h · {{ snapshot.checkedAt }}
       </p>
       <code>{{ snapshot.snapshotSha256 }}</code>
+      <article v-if="snapshot.echoF1CnV2Reference" class="card" data-testid="echo-cn-price-coverage">
+        <h3>ECHO F1 CN v2 · CNY</h3>
+        <p>{{ s.t("已确认的设计基线，不代表当前打开项目的实时清单。", "Confirmed authored baseline; not the active project's live BOM.") }}</p>
+        <a :href="safeExternal(snapshot.echoF1CnV2Reference.sourceUrl)" target="_blank" rel="noopener noreferrer">
+          {{ s.t("设计清单来源", "Authored BOM source") }} · {{ snapshot.echoF1CnV2Reference.sourceRevision.slice(0, 7) }} ↗
+        </a>
+        <p><strong>{{ s.t("设计预算分配（不是供应商报价）", "Design budget allocation (not a supplier quote)") }}: CNY {{ snapshot.echoF1CnV2Reference.budgetAllocationCny }}</strong></p>
+        <p>{{ s.t("有日期的挂牌价格记录", "Dated listing observations") }}: {{ snapshot.echoF1CnV2Reference.observedLineCount }}/17 ·
+          {{ s.t("缺少价格记录", "Missing price observations") }}: {{ snapshot.echoF1CnV2Reference.missingObservationCount }}</p>
+        <p><strong>{{ s.t("整车采购总价：未知", "Whole-car purchase total: UNKNOWN") }}</strong></p>
+        <p>{{ s.t("全部条目待采购确认；库存、税费、运费、准确版本及适配均未确认。", "All lines await purchasing confirmation: stock, tax, shipping, exact revisions and fit are unconfirmed.") }}</p>
+        <details v-for="line in snapshot.echoF1CnV2Reference.lines" :key="line.id" class="cn-bom-line" :open="Boolean(line.dimensionConflict)">
+          <summary>{{ typeof line.name === 'string' ? line.name : line.name.appearanceDisabled }} ·
+            {{ line.observation ? `CNY ${line.observation.amountCny} / piece` : s.t("价格未知", "Price unknown") }}</summary>
+          <p>{{ s.t("采购数量", "Purchase units") }}: {{ line.quantity }} {{ line.unit }} ·
+            {{ s.t("安装数量", "Installed") }}: {{ line.installedQuantity ?? "UNKNOWN" }}
+            <span v-if="line.packSize"> · {{ line.packSize }} / pack</span></p>
+          <p>{{ s.t("每采购单位的预算（不是报价）", "Budget per purchase unit (not a quote)") }}: CNY {{ line.budgetUnitCny }}</p>
+          <p>{{ line.status }} · {{ line.gate }}</p>
+          <p v-if="typeof line.specification === 'string'">{{ line.specification }}</p>
+          <template v-else>
+            <p>{{ s.t("默认外观", "Default appearance") }}: {{ line.specification.appearanceDisabled }}</p>
+            <p>{{ s.t("可选外观", "Optional appearance") }}: {{ line.specification.appearanceEnabled }}</p>
+          </template>
+          <p v-if="line.observation">
+            {{ s.t("仅挂牌记录；非实时价格", "Listing observation only; not a live price") }} · {{ line.observation.reviewedAt }} ·
+            {{ s.t("来源时效", "Source freshness") }}: {{ line.observation.freshness }} ·
+            <a :href="safeExternal(line.observation.url)" target="_blank" rel="noopener noreferrer">{{ s.t("供应商来源", "Supplier source") }} ↗</a>
+          </p>
+          <div v-if="line.dimensionConflict" data-testid="sensor-dimension-conflict">
+            <strong>DIMENSIONS_TO_CONFIRM</strong>
+            <p>{{ s.t("设计 / 英文 Wiki", "Design / English wiki") }}: {{ line.dimensionConflict.designMm.join(' × ') }} mm ·
+              {{ s.t("中国商品页", "China listing") }}: {{ line.dimensionConflict.listingMm.join(' × ') }} mm</p>
+            <p>{{ s.t("必须确认准确硬件版本、完整轮廓及接线；保持现有 CAD，由设计负责人解决差异。", "Confirm the exact hardware revision, full envelope and wiring. Preserve existing CAD; the design owner must resolve the discrepancy.") }}</p>
+            <a v-for="(url, i) in line.dimensionConflict.sources" :key="url" :href="safeExternal(url)" target="_blank" rel="noopener noreferrer">{{ i === 0 ? 'English wiki' : 'China listing' }} ↗ </a>
+          </div>
+        </details>
+      </article>
       <article v-if="snapshot.soundCarReference" class="card" data-testid="car-price-coverage">
-        <h3>{{ s.t("声控车参考清单 · 人民币", "Sound-car reference · CNY") }}</h3>
+        <h3>{{ s.t("历史声控车参考清单 · 人民币", "Historical sound-car reference · CNY") }}</h3>
         <p>{{ s.t("这是参考套件，不是当前项目的完整清单。", "Reference kit, not the active project's complete BOM.") }}</p>
         <p>{{ s.t("可计算参考价格", "Usable indicative prices") }}: {{ snapshot.soundCarReference.pricedLineCount }}/7 ·
           {{ s.t("缺失或不可报价", "Missing or unquotable") }}: {{ snapshot.soundCarReference.missingLineCount }}</p>

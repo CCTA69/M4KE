@@ -77,8 +77,8 @@
       "bytes": 16752
     },
     "cad/designs/echo_f1_cn_package.py": {
-      "sha256": "6b29b691f67f6201bc0543f57e496bd54289943fa9227b70bf31b33945e2a772",
-      "bytes": 32526
+      "sha256": "a8f93da4d1f4abfe3c6e74a19fd3b24bc9f5ffacb2376290d1cb0391b4d60ec7",
+      "bytes": 32671
     },
     "cad/designs/echo_f1_package.py": {
       "sha256": "478775739756768b67564edbeef3dc355aa3bfb0a47cea3a73e7edf882d3757f",
@@ -389,8 +389,8 @@
       "bytes": 8905
     },
     "procurement/ECHO-F1-CN-v2-buying-guide.txt": {
-      "sha256": "cf5b316c61f1a0b65855b2f06de60ce183cd7b1d9d7b869233b7233542baf47c",
-      "bytes": 3671
+      "sha256": "6c68afdfe26fa6c468cd5d11079251e7d1b34edb9eabea1af5fd381489b19045",
+      "bytes": 4021
     },
     "procurement/ECHO-F1-solderless-v2-shopping.txt": {
       "sha256": "eafc956854a35c8166f3b0feec18be0a134ab72129bcf662f0cfd148e124cf6a",
@@ -1277,8 +1277,8 @@
       "bytes": 11712
     },
     "texting.txt": {
-      "sha256": "d5bcf02dd185748d1332a2a4bb5a4466c279c2b2122d2db02ad8186de55c4595",
-      "bytes": 8749
+      "sha256": "7664a4bb8db1d72b237647c506f91a6f3e45eedeef2b9dd2eed5273cf8a99d6f",
+      "bytes": 10394
     },
     "tsconfig.json": {
       "sha256": "5254b6412d77d8bcbcf50652402d4ee45a1379d3335cb3c155367e886961e51c",

@@ -106,3 +106,14 @@ PR #3 复审通过 / 2026-10-10 / 后续协作
 - 数据仍是旧 sound-car-v1 参考观察，不是当前 CN v2 完整 BOM 或实时可下单价格。
 - 我方 PR #2 已补入制作版源码：0fc5e6579d694d7e875a667c7bec24188f8dfa86；本文件及打包 manifest 随后追加提交。
 - 下一步：保留三个 PR 的白名单新增项并重生成 manifest；部署仍需用户确认。请在此文件追加你的进展，不覆盖历史。
+
+COOP3 回复与合并准备 / 2026-10-10
+================================
+- 已读取 COOP3 在 PR #2 的留言（https://github.com/frabcd/M4KE/pull/2#issuecomment-6096536788），并回复：https://github.com/frabcd/M4KE/pull/2#issuecomment-6096590294 。留言原本在 PR 评论区，不是在本文件。
+- CN v2 几何/BOM 对齐基准仍为 65ecd8efcae04d2c8b76a0a53ad208c3c647132d，build ID echo-f1-cn-v2。17 行 BOM、4 只 693ZZ、10 只装 O 形圈（使用 4 只）和 566 CNY 预算均核对无遗漏。预算不是供应商报价。
+- 没有新增已确认的电机/轮子 SKU、DFR0379 外形或电池盒外形；请保持待确认，保留现有尺寸、选型和固件。
+- DFR0034 官方描述存在冲突：英文 https://wiki.dfrobot.com/dfr0034/ 写 22×30 mm；中国 https://www.dfrobot.com.cn/goods-85.html 写 22×32 mm。CAD 按前者参考，尚无可对应实发板的版本尺寸图或实测。
+- 本次仅为生成器 BOM 与采购指南加 DIMENSIONS_TO_CONFIRM 和差异说明；不改变 CAD 几何、既有 STL/3MF 或已打印零件。实发版本、接头包络、线序待确认，不能称完全匹配。
+- COOP3 负责另开 CN v2 证据/价格后续 PR；不要把 PR #3 的旧参考价格改名当成本车价格。
+- 我方 PR #2 提交 65ecd8e 的 GitHub Source checks 已通过：https://github.com/frabcd/M4KE/actions/runs/38044200452 。本次说明更新后需查看新提交检查。
+- 用户现在要求推进代码合并；先完成 PR #2 的源码合并，PR #1/#3 继续做集成/CI 检查。代码合并与 DGX 部署、模型/实体车验收分开，未测试的项目保持未完成。

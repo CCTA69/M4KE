@@ -37,7 +37,7 @@ def buy(name,qty,spec,cost,url='',status='SPECIFIED_NOT_ORDERED'):
 buy('DFRobot Romeo mini DFR1063',1,'ESP32-C3集成双路驱动；成品已焊排针/螺丝端子；47×38.5 mm。购物车已有，勿重复。',145,'https://wiki.dfrobot.com/dfr1063/')
 buy('带接口N20电机 6V / 50:1',2,'必须带预焊抑噪接口板+PH2.0转已剥皮/压端子引线。参考440rpm、堵转0.35A；12×10截面，本体26–32mm，3mm D轴有效长9.27mm。裸FIT0094不等于这个版本。',45,'https://wiki.dfrobot.com.cn/026_%E9%87%91%E5%B1%9E%E5%87%8F%E9%80%9F%E7%94%B5%E6%9C%BA','SELLER_MATCH_REQUIRED')
 buy('42×19 mm 橡胶驱动轮',2,'和上行N20同店配套，3mm D孔，有效咬合至少5mm；轮内侧到电机端面留4mm；带轮芯无需Pololu轮毂。',15,'','SELLER_MATCH_REQUIRED')
-buy('Gravity DFR0034 V2 声音模块',1,'仅买支持3.3V版本，22×30mm；成品带Gravity转2.54母头线，不买待焊排针。用于相对强度，不是校准分贝计。',35,'https://wiki.dfrobot.com/dfr0034/')
+buy('Gravity DFR0034 V2 声音模块',1,'仅买支持3.3V版本；CAD按英文Wiki的22×30mm参考，中国官网写22×32mm，版本/外形与接头包络须确认，不能据型号判定适配。成品带Gravity转2.54母头线，不买待焊排针。用于相对强度，不是校准分贝计。',35,'https://wiki.dfrobot.com/dfr0034/','DIMENSIONS_TO_CONFIRM')
 buy('DFRobot DFR0379 降压模块',1,'LM2596S带显示/螺丝端子；空载设5.5V；本体和接头须在66×40×20mm包络内，超出先改托位。不可省略稳压。',25,'https://www.dfrobot.com.cn/goods-1351.html','DIMENSIONS_TO_CONFIRM')
 buy('AA镍氢电池',8,'同品牌同容量1.2V、1900–2500mAh；不要14500锂电池，不混新旧电池。',8)
 buy('镍氢专用充电器',1,'支持8节所购AA NiMH（或分两批充），电池取出充电。',40)

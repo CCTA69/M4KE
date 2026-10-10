@@ -68,6 +68,57 @@ the real English/Chinese component + HTTP test (PowerShell: set
 `$env:M4KE_TEST_ECHO_CN='1'`, then run the script). Without the flag, it checks
 the historical snapshot and zero CN observations. Neither mode contacts suppliers.
 
+## CN v2 sourcing follow-up — candidates reviewed 2026-10-10
+
+These five **unselected sourcing candidates** are for the design owner's review.
+They are not additional entries in the installed snapshot, approved substitutions,
+or checkout quotations. Runtime coverage remains **3/17 observations, 14 unknown
+prices**. The authored BOM, CAD, firmware and existing snapshot pin are unchanged.
+Public web extraction can be cached: the review date is not the supplier's price
+update time. Tax, shipping, order rules and deliverability remain unconfirmed.
+
+| BOM row | Seller reference and advertised CNY amount | Purchase-unit interpretation | Required decision/evidence |
+| --- | --- | --- | --- |
+| `motors` | [DFRobot FIT0468](https://www.dfrobot.com.cn/goods-1244.html), **38.00 each** | Two motors: 2 × 38.00 = 76.00 in listing arithmetic only | Listing specifies 50:1, 440 rpm at 6 V, 350 mA stall, 9.27 mm D shaft, PH2.0 interference-suppression interface, one single-ended and one double-ended lead. Confirm body/connector envelope against CAD and that supplied leads have the required stripped/crimped ends. The exact source drawing did not load during this review. `SELLER_MATCH_REQUIRED` stays open. |
+| `drive-wheels` | [DFRobot FIT0085](https://www.dfrobot.com.cn/goods-749.html), **15.00 per listed two-wheel set** | One set supplies two installed wheels; do not multiply 15.00 by two | Listing states 42 mm diameter, 19 mm width and two wheels in the shipping list; the FIT0468 page links to this wheel. Design owner must confirm bore, insertion depth ≥5 mm and 4 mm motor-face clearance from the actual drawing/part. A supplier cross-link is not measured fit. |
+| `usb-cable` | [DFRobot-store FIT0641](https://www.dfrobot.com.cn/goods-2977.html), **15.00 per cable** | One 1 m cable | Listing explicitly describes data transfer plus power, not charge-only. Store lists an unspecified/other brand. Confirm host-side connector and programming with the intended board; no cable has been selected or purchased. |
+| `aa-cells` | [IKEA China LADDA 705.098.15](https://www.ikea.cn/cn/zh/p/ladda-la-da-chong-dian-dian-chi-hr06-aa-1-2v-70509815/), **39.99 per four-cell pack** | Eight cells require two packs: 79.98, not 8 × 39.99 | Page specifies AA, 1.2 V, 1900 mAh and four cells. Confirm exact chemistry/revision, matched packs and the design's required discharge performance with the design owner. Location-dependent stock was not established; the extracted page displayed temporarily unavailable. |
+| `charger` | [IKEA China STENKOL 905.064.39](https://www.ikea.cn/cn/zh/p/stenkol-si-dian-ke-dian-chi-chong-dian-qi-90506439/), **39.99 each** | One charger; four slots, so eight cells require two batches | Product page supports AA/AAA NiMH, with AA capacity ≥1000 mAh, and recommends LADDA. Confirm purchased-cell compatibility and local availability. The extracted page displayed temporarily unavailable. This is not an in-stock purchasing recommendation. |
+
+Evidence access: motor and wheel product pages opened through web extraction
+(reported crawl ages: two months and six days). FIT0641 was available as a
+product search extraction (one week); direct page open failed, so its confidence
+is lower. LADDA and STENKOL product pages opened (four days and one month).
+No original supplier HTML, account session, token or private cart was retained or
+published. All prices remain dated advertised amounts with freshness **UNKNOWN**.
+
+The motor candidate is specifically **FIT0468**. Do not substitute similarly named
+DFR0429 (integrated servo-style driver), FIT0579 (50 rpm rather than 50:1), or bare
+FIT0094 merely because a search mentions N20. No electrical or dimensional design
+change is authorized by this research.
+
+The other nine missing rows remain unresolved:
+
+| Row | Evidence still needed before a price can be associated |
+| --- | --- |
+| `battery-holder` | Exact single-layer 8×AA series holder SKU; full outline ≤120×65×20 mm and prepared wire ends. |
+| `switch-fuse-harness` | Complete preassembled switch/fuse assembly, DC rating and dimensions, 1 A slow-blow fuse plus two spares; separate bare parts are not a complete kit price. |
+| `arm-button` | Exact normally-open dry-contact module, preassembled headers and ≤15×12×7 mm outline; do not substitute an active 5 V output board. |
+| `wiring-kit` | Defined quantities and prepared ends for 22 AWG power, 26 AWG signal, 15–20 cm female-female leads and at least four insulated lever terminals. |
+| `fasteners` | Itemized lengths/counts and spacer dimensions from the authored row, including axle shoulder coverage; generic M3 assortment prices are insufficient. |
+| `bearings` | The four existing-cart 693ZZ 3×8×4 mm bearings' actual seller/brand and purchase-unit price; a different 693ZZ listing does not identify the cart item. |
+| `o-rings` | Existing selected NBR70, 40 mm inner diameter ×3 mm cross-section, ten-piece pack; exclude outer-diameter listings or other hardness/material. |
+| `filament-share` | Exact selected material/color spool prices plus measured sliced mass; a whole-spool checkout cost is separate from consumed-material allocation. |
+| `insulation-ties` | Complete quantities for 2 mm closed-cell foam, ≥20 ties of 2.5 mm width and nonconductive tape; a single item's price cannot cover the bundle. |
+
+Before a later runtime-data PR, the design owner must confirm which candidate
+SKUs correspond to these rows and resolve the listed gates. Capture reviewed
+evidence and purchase units, then create a new immutable snapshot and test its
+HTTP/MCP/UI associations. Do not rename or overwrite the current three-entry
+snapshot, mix these candidate amounts with the CNY 566 budget, or publish a
+whole-car total from this table. The DFR0034 22×30 versus 22×32 mm conflict also
+remains open.
+
 ## Historical sound-car-v1 — 2026-10-10 China price observations
 
 The existing `sound-car-v1` reference uses one headerless Pico, one Adafruit

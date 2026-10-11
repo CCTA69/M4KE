@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import {ref,watch,onBeforeUnmount} from 'vue';
+import {ref,computed,watch,onBeforeUnmount} from 'vue';
 import {useStudio} from '../studio/store';
 import {api,send,safeExternal} from '../studio/api';
 const s=useStudio(),text=ref(''),busy=ref(false),error=ref(''),enabled=ref(false),progress=ref('');
 type Item={id:string;query:string;quantity:number;mpn?:string};
 type Offer={name:string;sku:string|null;amount:string;currency:string;url:string;match:string;availability:string;extraction:string};
-type Line=Item&{status:string;retrievedAt?:string;cacheHit?:boolean;stale?:boolean;offers:Offer[];issues:string[]};
+type Line=Item&{unit?:string;status:string;retrievedAt?:string;cacheHit?:boolean;stale?:boolean;offers:Offer[];issues:string[]};
 const lines=ref<Line[]>([]);
+const manual=ref(false);
+const automatic=computed(()=>{const p=s.project;return !p?.requiresDesignUpdate&&p?.priceSearch?.designHash===p?.designHash?p?.priceSearch:null;});
+const displayedLines=computed(()=>manual.value?lines.value:automatic.value?.lines||[]);
 let epoch=0;
 onBeforeUnmount(()=>{epoch++;});
 api<{enabled:boolean}>('/api/studio/prices/search').then(r=>enabled.value=r.enabled).catch(()=>{});
 // Invalidate displayed evidence when its input/project revision changes.
 watch(text,()=>{epoch++;lines.value=[];});
-watch(()=>s.spec,()=>{epoch++;lines.value=[];text.value='';});
+watch(()=>[s.project?.id,s.project?.designHash],()=>{epoch++;lines.value=[];text.value='';manual.value=false;error.value='';},{flush:'post'});
 function loadBom(){
+  manual.value=true;
   const rows=(s.spec?.parts||[]).filter(p=>p.kind==='purchased').map(p=>{
     const c=p.shape.type==='catalog'?s.catalog.components.find(c=>c.id===(p.shape as {catalogId:string}).catalogId):null;
     return `${c?.mpn||p.name} | 1${c?.mpn?' | '+c.mpn:''}`;
@@ -22,7 +26,7 @@ function loadBom(){
   if(!rows.length)error.value=s.t('当前设计没有采购件。也可手动输入任何物料清单。','No purchased parts in this design. You can enter any parts list below.');
 }
 async function search(){
-  error.value='';lines.value=[];
+  error.value='';lines.value=[];manual.value=true;
   const rows=text.value.split('\n').map(t=>t.trim()).filter(Boolean);
   if(!rows.length||rows.length>100){error.value=s.t('请输入 1–100 行。','Enter 1–100 lines.');return;}
   const items:Item[]=[];
@@ -45,15 +49,17 @@ async function search(){
 <template>
   <section class="bom-price-search">
     <h2>{{s.t('搜索物料价格','Find prices for your parts')}}</h2>
+    <p v-if="automatic&&!manual" class="automatic-price-status">{{s.t('当前设计已自动查询价格','Prices searched automatically for this design')}} · {{automatic.status}}</p>
+    <p v-for="issue in (!manual?automatic?.issues:[])" :key="issue" role="alert">{{issue}}</p>
     <p>{{s.t('适用于时钟、小车或其他设计。每行：名称/型号 | 数量 | 精确型号（可选）。仅发送元件搜索词。','Works with clocks, cars or other designs. One line: name/MPN | quantity | exact MPN (optional). Only component search terms are sent.')}}</p>
     <p v-if="!enabled">{{s.t('目前仅查缓存。运行服务需启用联网价格搜索。','Cache-only mode. Online price search must be enabled on the server.')}}</p>
     <button :disabled="busy" @click="loadBom">{{s.t('载入当前设计采购件','Load purchased parts from current design')}}</button>
-    <textarea v-model="text" :disabled="busy" rows="5" :aria-label="s.t('物料清单价格搜索','BOM price search')" placeholder="DS3231 | 1&#10;OLED display | 1"></textarea>
+    <textarea v-model="text" @input="manual=true" :disabled="busy" rows="5" :aria-label="s.t('物料清单价格搜索','BOM price search')" placeholder="DS3231 | 1&#10;OLED display | 1"></textarea>
     <button class="primary" :disabled="busy||!text.trim()" @click="search">{{busy?s.t('搜索中','Searching'):s.t('搜索人民币价格','Search RMB prices')}} {{progress}}</button>
     <button v-if="busy" @click="epoch++">{{s.t('停止后续查询','Stop remaining searches')}}</button>
     <p v-if="error" role="alert">{{error}}</p>
-    <article v-for="line in lines" :key="line.id">
-      <h3>{{line.query}} × {{line.quantity}}</h3>
+    <article v-for="line in displayedLines" :key="line.id">
+      <h3>{{line.query}} × {{line.quantity}} {{line.unit||''}}</h3>
       <small>{{line.retrievedAt||line.status}} {{line.cacheHit?s.t('缓存','Cached'):''}} {{line.stale?s.t('已过期','STALE'):''}}</small>
       <p v-if="!line.offers.length">{{s.t('未取得价格；此项仍未知。','No price obtained; this item remains unknown.')}}</p>
       <div v-for="(offer,i) in line.offers" :key="i" class="offer">

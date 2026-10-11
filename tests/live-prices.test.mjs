@@ -8,6 +8,22 @@ import {createIntegrationRuntime,createIntegrationsService} from '../server/stud
 import http from 'node:http';
 
 const page = (sku='DFR0034', price='40.00') => `<h1>Sound sensor</h1><div class="goodsMes" data-price="${price}" data-stock="有货"><div class="content2">DFROBOT</div><div class="content2">${sku}</div></div><font id="ECS_SHOPPRICE">￥${price}</font>`;
+test('automatic design prices cover purchased instances and build items with explicit quantity gaps',async t=>{
+  const root=await mkdtemp(path.join(os.tmpdir(),'m4ke-auto-price-'));t.after(()=>rm(root,{recursive:true,force:true}));
+  const spec={parts:[{id:'case',name:'Case',kind:'printed'},{id:'rtc',name:'Clock',kind:'purchased',shape:{type:'catalog',catalogId:'rtc'}}],buildItems:[{id:'screws',name:'M3 screws',kind:'fastener',quantity:4,unit:'piece'},{id:'wire',name:'Wire',kind:'consumable',quantity:150,unit:'mm'}]};
+  const before=JSON.stringify(spec),queries=[];
+  const service=prices.createLivePrices({root,enabled:true,get:async url=>{if(url.includes('search.php')){queries.push(new URL(url).searchParams.get('keywords'));return '<a href="goods-85.html">result</a>';}return page('DFR0641','49');}});
+  const result=await service.searchDesign(spec,{components:[{id:'rtc',mpn:'DFR0641'}]});
+  assert.deepEqual(queries,['DFR0641','M3 screws']);assert.equal(result.lines.length,3);
+  assert.equal(result.lines[0].partId,'rtc');assert.equal(result.lines[0].offers[0].amount,'49');assert.equal(result.lines[1].quantity,4);
+  assert.equal(result.lines[2].status,'PURCHASE_UNIT_REQUIRED');assert.equal(result.total,null);assert.equal(JSON.stringify(spec),before);
+});
+test('automatic lookup covers over twenty instances offline without network or lost rows',async t=>{
+  const root=await mkdtemp(path.join(os.tmpdir(),'m4ke-many-prices-'));t.after(()=>rm(root,{recursive:true,force:true}));
+  const service=prices.createLivePrices({root,enabled:false,get:()=>{throw Error('No network allowed');}});
+  const result=await service.searchDesign({parts:Array.from({length:25},(_,i)=>({id:'part-'+i,name:'Clock module '+i,kind:'purchased'}))});
+  assert.equal(result.lines.length,25);assert.equal(result.networkUsed,false);assert(result.lines.every(l=>l.status==='OFFLINE_CACHE_MISS'&&l.quantity===1));
+});
 test('supplier amounts come from the product price field, never basket totals or snippets',()=>{
   const r=prices.extractPrices('<span>Cart total: 999.99</span>'+page(),'https://www.dfrobot.com.cn/goods-85.html');
   assert.equal(r[0].amount,'40.00');assert.equal(r[0].currency,'CNY');assert.equal(r[0].sku,'DFR0034');

@@ -171,5 +171,29 @@ export function createLivePrices({root,enabled=process.env.M4KE_ALLOW_WEB==='1'&
       return {...status(),lines,networkUsed,total:null,completeQuote:false,sourceContentIsData:true,observedLines:lines.filter(l=>l.offers.length).length,limitations:['Displayed prices are unselected supplier observations. Check variants, pack contents, tax, shipping and stock before using them as a BOM quote.','Search covers supported public suppliers, not every seller. Missing prices and printed-material consumption are not zero.']};
     }finally{active=false;}
   }
-  return {status,search};
+  async function searchDesign(spec,catalog={}){
+    const rows=[];
+    for(const part of spec.parts||[]){
+      if(part.kind!=='purchased')continue;
+      const component=part.shape?.type==='catalog'?catalog.components?.find(c=>c.id===part.shape.catalogId):null;
+      const mpn=component?.mpn||component?.sku;
+      rows.push({id:'part-'+rows.length,partId:part.id,query:mpn||part.name,quantity:1,unit:'piece',...(mpn?{mpn}:{})});
+    }
+    for(const item of spec.buildItems||[])rows.push({id:'build-'+rows.length,buildItemId:item.id,query:item.name,quantity:item.quantity,unit:item.unit});
+    const lines=[],started=Date.now();let networkUsed=false;
+    for(const row of rows){
+      const gap=(code,message)=>lines.push({...row,status:code,offers:[],issues:[message]});
+      if(!['piece','set'].includes(row.unit)||!Number.isSafeInteger(row.quantity)||row.quantity<1){gap('PURCHASE_UNIT_REQUIRED','Design consumption is not a supplier pack quantity. Confirm the purchase unit.');continue;}
+      if(Date.now()-started>=60000){gap('NOT_SEARCHED_TIME_LIMIT','Automatic search time limit reached; retry this row in Procurement.');continue;}
+      try{
+        const {id,query,quantity,mpn}=row;
+        const result=await search({items:[{id,query,quantity,...mpn?{mpn}:{}}]});
+        networkUsed||=result.networkUsed;lines.push({...result.lines[0],...row});
+      }catch{gap('SEARCH_UNAVAILABLE','Price lookup unavailable for this item; retry in Procurement.');}
+    }
+    return {...status(),automatic:true,lines,networkUsed,total:null,completeQuote:false,sourceContentIsData:true,
+      observedLines:lines.filter(l=>l.offers.length).length,finishedAt:new Date(now()).toISOString(),
+      status:!lines.length?'NO_PURCHASED_ITEMS':lines.every(l=>l.offers.length)?'PRICE_CANDIDATES':'PRICE_GAPS'};
+  }
+  return {status,search,searchDesign};
 }
